@@ -12,6 +12,35 @@ local layout = require("./layout")
 local radar = require("./radar")
 
 local M = {}
+local zeron_ref: any = nil
+
+local function is_light_theme(): boolean
+	if ui.theme and ui.theme.current then
+		ui.theme.current:get()
+	end
+	if zeron_ref and type(zeron_ref.read) == "function" then
+		local ok, app = pcall(function()
+			return zeron_ref.read("appearance")
+		end)
+		if ok and app == "light" then
+			return true
+		elseif ok and app == "dark" then
+			return false
+		end
+	end
+	if ui.theme and type(ui.theme.get) == "function" then
+		local ok, bg = pcall(function()
+			return ui.theme.get("background")
+		end)
+		if ok and type(bg) == "string" and string.sub(bg, 1, 1) == "#" and #bg >= 7 then
+			local r = (tonumber(string.sub(bg, 2, 3), 16) or 0) / 255
+			local g = (tonumber(string.sub(bg, 4, 5), 16) or 0) / 255
+			local b = (tonumber(string.sub(bg, 6, 7), 16) or 0) / 255
+			return (0.299 * r + 0.587 * g + 0.114 * b) > 0.52
+		end
+	end
+	return false
+end
 
 type SpunWeb = {
 	id: number,
@@ -143,9 +172,10 @@ local function SpiderActorCanvas(props: { slot: SpiderSlot }): Node
 			local body_dark = ink.canvas({ token = "text.primary", alpha = 0.92 })
 			local leg_col = ink.canvas({ token = "text.primary", alpha = 0.85 })
 			local leg_hi = ink.canvas({ token = "accent", alpha = 0.90 })
-			local shadow_c = ink.canvas({ token = "background", alpha = 0.42 })
+			local light = is_light_theme()
+			local shadow_c = if light then "#00000024" else ink.canvas({ token = "background", alpha = 0.42 })
 			local eye_c = "#ffffff"
-			local eye_rim = ink.canvas("background")
+			local eye_rim = if light then "#090d16" else ink.canvas("background")
 
 			-- === CARTOON SPIDER-MAN HERO (when swinging out after entering completed session) ===
 			if ph == "swing" then
@@ -160,7 +190,7 @@ local function SpiderActorCanvas(props: { slot: SpiderSlot }): Node
 				local suit_red = "#ef3340"
 				local suit_blue = "#1d4ed8"
 				local ink_line = "#090d16"
-				local silk_c = "#f8fafc"
+				local silk_c = if light then "#334155" else "#f8fafc"
 
 				if st >= SWING_SHOOT_S then
 					local streak_alpha = clamp((st - SWING_SHOOT_S) / 0.4, 0.25, 0.85)
@@ -359,8 +389,9 @@ local function SpunWebCanvas(props: { web: () -> SpunWeb?, now_fn: () -> number 
 				then age / 0.9
 				elseif remain < 4.0 then remain / 4.0
 				else 1.0
-			local alpha_line = 0.42 * fade
-			local alpha_ring = 0.36 * fade
+			local light = is_light_theme()
+			local alpha_line = (if light then 0.28 else 0.42) * fade
+			local alpha_ring = (if light then 0.22 else 0.36) * fade
 			if alpha_line <= 0.01 then
 				return
 			end
@@ -371,7 +402,7 @@ local function SpunWebCanvas(props: { web: () -> SpunWeb?, now_fn: () -> number 
 			local step = (math.pi * 2) / spokes
 			local silk = ink.canvas({ token = "text.primary", alpha = alpha_line })
 			local silk_ring = ink.canvas({ token = "text.primary", alpha = alpha_ring })
-			local hub = ink.canvas({ token = "accent", alpha = 0.55 * fade })
+			local hub = ink.canvas({ token = "accent", alpha = (if light then 0.62 else 0.55) * fade })
 
 			for i = 0, spokes - 1 do
 				local a = i * step + 0.2
@@ -395,6 +426,7 @@ local function SpunWebCanvas(props: { web: () -> SpunWeb?, now_fn: () -> number 
 end
 
 function M.register(zeron: any, show_pet: any)
+	zeron_ref = zeron
 	math.randomseed(math.floor((ui.now() % 1000000)))
 
 	zeron.place {
@@ -1219,8 +1251,12 @@ function M.register(zeron: any, show_pet: any)
 					h = function(): number
 						return math.max(0, sl.anchor_by - sl.pose:get().by)
 					end,
-					bg = "$border",
-					opacity = 0.7,
+					bg = function(): string
+						return if is_light_theme() then "$text.tertiary" else "$border"
+					end,
+					opacity = function(): number
+						return if is_light_theme() then 0.6 else 0.7
+					end,
 					pointer_events = "none",
 				})
 
@@ -1263,15 +1299,20 @@ function M.register(zeron: any, show_pet: any)
 							local cur_x2 = x1 + (x2 - x1) * prog
 							local cur_y2 = y1 + (y2 - y1) * prog
 
-							local glow = ink.canvas({ token = "accent", alpha = 0.24 })
+							local light = is_light_theme()
+							local glow = ink.canvas({ token = "accent", alpha = if light then 0.28 else 0.24 })
+							local silk_main = if light then "#334155" else "#f8fafc"
 							c:line(x1, y1, cur_x2, cur_y2, glow, 4.0)
-							c:line(x1, y1, cur_x2, cur_y2, "#f8fafc", 1.8)
+							c:line(x1, y1, cur_x2, cur_y2, silk_main, if light then 2.2 else 1.8)
+							if light then
+								c:line(x1, y1, cur_x2, cur_y2, "#ffffffcc", 0.9)
+							end
 
 							if prog >= 0.95 then
-								c:circle(x2, y2, 3.2, "#f8fafc")
+								c:circle(x2, y2, 3.2, silk_main)
 								for k = 0, 5 do
 									local ra = k * (math.pi / 3) + 0.3
-									c:line(x2, y2, x2 + math.cos(ra) * 8, y2 + math.sin(ra) * 8, "#f8fafc", 1.1)
+									c:line(x2, y2, x2 + math.cos(ra) * 8, y2 + math.sin(ra) * 8, silk_main, if light then 1.3 else 1.1)
 								end
 							end
 						end,
@@ -1353,6 +1394,7 @@ function M.register(zeron: any, show_pet: any)
 					border = 1,
 					border_color = "$border",
 					bg = "$surface.raised",
+					shadow = "$shadow.md",
 					hover = { bg = "$surface.base", border_color = "$accent" },
 					active = { bg = "$surface.sunken", border_color = "$accent" },
 					cursor = "pointer",

@@ -34,7 +34,28 @@ local SPRING = { stiffness = 140, damping = 20 }
 
 local QUOTES = { "quotes.q1", "quotes.q2", "quotes.q3", "quotes.q4" }
 
-local function SpiderScene(reach: number, pointer: () -> any): Node
+local function is_light_theme(): boolean
+	if ui.theme and ui.theme.current then
+		ui.theme.current:get()
+	end
+	return zeron.read("appearance") == "light"
+end
+
+local function themed_web_image(dark_src: string, light_src: string, w: number, h: number): Node
+	return ui.presence(function(): string
+		return if is_light_theme() then "light" else "dark"
+	end, function(mode: string): Node
+		return ui.image {
+			src = if mode == "light" then light_src else dark_src,
+			w = w,
+			h = h,
+			fit = "contain",
+			aria_hidden = true,
+		}
+	end, { w = w, h = h, shrink = 0 })
+end
+
+local function SpiderScene(reach: number, pointer: () -> any, light: boolean): Node
 	local function axis(name: string): State<number>
 		return ui.computed(function(): number
 			local p = pointer()
@@ -83,8 +104,8 @@ local function SpiderScene(reach: number, pointer: () -> any): Node
 		overflow = "hidden",
 		role = "img",
 		label = "Spider-Verse NYC Skyline",
-		layer("art/skyline.webp", 0.6),
-		layer("art/web-near.webp", 1.8),
+		layer(if light then "art/skyline-light.webp" else "art/skyline.webp", 0.6),
+		layer(if light then "art/web-near-light.webp" else "art/web-near.webp", 1.8),
 	}
 end
 
@@ -96,9 +117,11 @@ zeron.place {
 		local pointer = zeron.live("pointer")
 		return ui.presence(function(): string
 			local reach = if motion.reduced() then 0 else (REACH[parallax:get()] or 1)
-			return tostring(reach)
+			local app = if is_light_theme() then "light" else "dark"
+			return `{reach}:{app}`
 		end, function(key: string): Node
-			return SpiderScene(tonumber(key) or 1, pointer)
+			local r_str, app = string.match(key, "^([^:]+):(.+)$")
+			return SpiderScene(tonumber(r_str) or 1, pointer, app == "light")
 		end, { w_full = true, h_full = true })
 	end,
 }
@@ -126,14 +149,7 @@ zeron.place {
 					min_w = 0,
 					items = "center",
 					gap = "$space.2",
-					ui.image {
-						src = "art/web-left.webp",
-						w = 76,
-						h = 20,
-						fit = "contain",
-						shrink = 0,
-						aria_hidden = true,
-					},
+					themed_web_image("art/web-left.webp", "art/web-left-light.webp", 76, 20),
 					ui.div {
 						grow = 1,
 						h = 1,
@@ -208,14 +224,7 @@ zeron.place {
 						bg = "$border",
 						opacity = 0.55,
 					},
-					ui.image {
-						src = "art/web-right.webp",
-						w = 76,
-						h = 20,
-						fit = "contain",
-						shrink = 0,
-						aria_hidden = true,
-					},
+					themed_web_image("art/web-right.webp", "art/web-right-light.webp", 76, 20),
 				},
 			}
 		end
@@ -362,14 +371,7 @@ zeron.place {
 				justify = "between",
 				gap = "$space.1",
 				overflow = "hidden",
-				ui.image {
-					src = "art/web-left.webp",
-					w = 38,
-					h = 18,
-					fit = "contain",
-					shrink = 0,
-					aria_hidden = true,
-				},
+				themed_web_image("art/web-left.webp", "art/web-left-light.webp", 38, 18),
 				ui.button {
 					grow = 1,
 					min_w = 0,
@@ -430,14 +432,7 @@ zeron.place {
 						truncate = true,
 					},
 				},
-				ui.image {
-					src = "art/web-right.webp",
-					w = 38,
-					h = 18,
-					fit = "contain",
-					shrink = 0,
-					aria_hidden = true,
-				},
+				themed_web_image("art/web-right.webp", "art/web-right-light.webp", 38, 18),
 			},
 		}),
 		}

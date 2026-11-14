@@ -31,8 +31,8 @@ function M.OrbWeb(props: { pct: number, warn_pct: number, size: number? }): Node
 			local step = (math.pi * 2) / spokes
 			local start_ang = -math.pi / 2
 
-			local web_muted = ink.canvas({ token = "border", alpha = 0.72 })
-			local web_ring_muted = ink.canvas({ token = "border", alpha = 0.52 })
+			local web_muted = ink.canvas({ token = "text.primary", alpha = 0.17 })
+			local web_ring_muted = ink.canvas({ token = "text.primary", alpha = 0.12 })
 			local active_fill = ink.canvas({ token = tok, alpha = 0.22 })
 			local active_silk = ink.canvas({ token = tok, alpha = 0.75 })
 			local active_bright = ink.canvas(tok)
@@ -146,8 +146,8 @@ function M.SilkBar(props: { pct: number, warn_pct: number }): Node
 			local cy = h / 2
 			local fill_x = pad + tw * frac
 
-			local rail_muted = ink.canvas({ token = "border", alpha = 0.7 })
-			local zig_muted = ink.canvas({ token = "border", alpha = 0.45 })
+			local rail_muted = ink.canvas({ token = "text.primary", alpha = 0.18 })
+			local zig_muted = ink.canvas({ token = "text.primary", alpha = 0.12 })
 			local active_bright = ink.canvas(tok)
 			local active_soft = ink.canvas({ token = tok, alpha = 0.48 })
 			local active_glow = ink.canvas({ token = tok, alpha = 0.25 })
@@ -221,7 +221,7 @@ function M.CornerWeb(props: { size: number?, alpha: number? }): Node
 			local ox, oy = w - 2, 2
 			local max_r = math.min(w, h) - 6
 			local stroke_col = ink.canvas({ token = "accent", alpha = a })
-			local ring_col = ink.canvas({ token = "border", alpha = a * 1.3 })
+			local ring_col = ink.canvas({ token = "text.primary", alpha = a * 0.32 })
 
 			-- Radial spokes fanning into the bottom-left quadrant (180 deg down to 90 deg)
 			local spoke_count = 6
