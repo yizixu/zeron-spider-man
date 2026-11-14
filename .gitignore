@@ -1,0 +1,11 @@
+# Zeron exports & local databases
+*.zeron-plugin
+*.db
+*.db-shm
+*.db-wal
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
