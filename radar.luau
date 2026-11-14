@@ -40,6 +40,8 @@ local MIN_ACTIVE_QUOTA: State<number?> = ui.state("spider_radar_min_quota", nil 
 local EVENTS: State<{ SignalEvent }> = ui.state("spider_radar_events", {} :: { SignalEvent })
 local REFRESHING: State<boolean> = ui.state("spider_radar_refreshing", false)
 local HIDDEN_REV: State<number> = ui.state("spider_radar_hidden_rev", 0)
+local EVENTS_REV: State<number> = ui.state("spider_radar_events_rev", 0)
+local USAGE_REV: State<number> = ui.state("spider_radar_usage_rev", 0)
 
 local zeron_ref: any = nil
 local notify_setting: any = nil
@@ -47,6 +49,12 @@ local warn_pct_setting: any = nil
 local hidden_store: any = nil
 local seeded_store: any = nil
 local wired = false
+local wired_zeron: any = nil
+local setting_wired_zeron: any = nil
+local stop_fns: { () -> () } = {}
+local threshold_stop: (() -> ())? = nil
+local fetch_seq = 0
+local refresh_seq = 0
 
 -- Providers that commonly remain in cached usage even when disabled/uninstalled
 -- or when they emit no quota windows; only applied on initial auto-filter seed.
@@ -110,6 +118,7 @@ local function push_event(kind: string, title: string, body: string, session: st
 		table.insert(next_list, prev[i])
 	end
 	EVENTS:set(next_list)
+	EVENTS_REV:set(EVENTS_REV:peek() + 1)
 end
 
 local function session_title(chat_id: string?): string
@@ -208,18 +217,35 @@ local function parse_usage(rows: any)
 
 	USAGE_LIST:set(parsed)
 	recompute_min_quota(parsed)
+	USAGE_REV:set(USAGE_REV:peek() + 1)
 end
 
 function M.fetch_usage()
 	if not zeron_ref then
 		return
 	end
-	pcall(function()
-		zeron_ref.usage():after(function(rows: any)
-			parse_usage(rows)
-		end, function(_err: any)
-			-- Permission not yet granted or no usage yet; keep quiet.
-		end)
+	fetch_seq += 1
+	local seq = fetch_seq
+	local z = zeron_ref
+	local ok, promise = pcall(function()
+		return z.usage()
+	end)
+	if not ok or not promise then
+		return
+	end
+	promise:after(function(rows: any)
+		if seq ~= fetch_seq or zeron_ref ~= z then
+			return
+		end
+		parse_usage(rows)
+	end, function(_err: any)
+		if seq ~= fetch_seq or zeron_ref ~= z then
+			return
+		end
+		-- Clear stale cached quota when permission is revoked, service is offline, or read fails.
+		USAGE_LIST:set({})
+		MIN_ACTIVE_QUOTA:set(nil)
+		USAGE_REV:set(USAGE_REV:peek() + 1)
 	end)
 end
 
@@ -227,18 +253,34 @@ function M.refresh_usage()
 	if not zeron_ref or REFRESHING:peek() then
 		return
 	end
+	refresh_seq += 1
+	local rseq = refresh_seq
+	local z = zeron_ref
 	REFRESHING:set(true)
-	pcall(function()
-		zeron_ref.usage_refresh():after(function()
-			REFRESHING:set(false)
-			M.fetch_usage()
-		end, function(err: any)
-			REFRESHING:set(false)
-			local reason = zeron_ref.reason(err)
-			if reason == "paced" then
-				zeron_ref.toast(zeron_ref.s("hub.refresh_paced"))
-			end
-		end)
+	local ok, promise = pcall(function()
+		return z.usage_refresh()
+	end)
+	if not ok or not promise then
+		REFRESHING:set(false)
+		return
+	end
+	promise:after(function()
+		if rseq ~= refresh_seq or zeron_ref ~= z then
+			return
+		end
+		REFRESHING:set(false)
+		M.fetch_usage()
+	end, function(err: any)
+		if rseq ~= refresh_seq or zeron_ref ~= z then
+			return
+		end
+		REFRESHING:set(false)
+		local reason = z.reason(err)
+		if reason == "paced" then
+			z.toast(z.s("hub.refresh_paced"))
+		else
+			z.toast(z.s("hub.refresh_failed"))
+		end
 	end)
 end
 
@@ -252,6 +294,14 @@ end
 
 function M.hidden_rev(): number
 	return HIDDEN_REV:get()
+end
+
+function M.events_rev(): number
+	return EVENTS_REV:get()
+end
+
+function M.usage_rev(): number
+	return USAGE_REV:get()
 end
 
 function M.is_hidden(provider: string): boolean
@@ -397,30 +447,95 @@ local function maybe_notify(title: string, body: string, session: string?)
 	end)
 end
 
+local function stop_threshold_listener()
+	if threshold_stop then
+		pcall(threshold_stop)
+		threshold_stop = nil
+	end
+end
+
+local function bind_threshold_listener(below_pct: number?)
+	stop_threshold_listener()
+	if not zeron_ref then
+		return
+	end
+	local z = zeron_ref
+	local target = below_pct or M.warn_threshold()
+	pcall(function()
+		threshold_stop = z.on("usage.threshold", function(e: any)
+			local prov = tostring((e and e.provider) or "agent")
+			if current_hidden_map()[prov] then
+				return
+			end
+			local pct = math.floor((tonumber(e and e.remaining) or 0) + 0.5)
+			local win = tostring((e and e.window) or "window")
+			local title = z.s("notify.quota_title", { pct = pct })
+			local body = z.s("notify.quota_body", { provider = prov, window = win, pct = pct })
+			push_event("quota", title, body, nil)
+			maybe_notify(title, body, nil)
+		end, { below = target })
+	end)
+end
+
+function M.ensure_wired()
+	if not wired and zeron_ref then
+		M.init(zeron_ref, notify_setting, warn_pct_setting)
+	end
+end
+
+function M.cleanup()
+	fetch_seq += 1
+	refresh_seq += 1
+	REFRESHING:set(false)
+	stop_threshold_listener()
+	for _, stop in stop_fns do
+		pcall(stop)
+	end
+	stop_fns = {}
+	wired = false
+	wired_zeron = nil
+end
+
 function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
+	if wired and wired_zeron ~= zeron then
+		M.cleanup()
+	end
 	zeron_ref = zeron
 	notify_setting = notify_opt
 	warn_pct_setting = warn_pct_opt
-	if not hidden_store then
-		hidden_store = zeron.store("spider_hidden_providers_v1", {})
+	hidden_store = zeron.store("spider_hidden_providers_v1", {})
+	seeded_store = zeron.store("spider_hidden_seeded_v2", false)
+
+	if setting_wired_zeron ~= zeron then
+		setting_wired_zeron = zeron
+		zeron.on_setting(function(id: string, value: any)
+			if id == "quota_warn_pct" and wired and wired_zeron == zeron then
+				bind_threshold_listener(tonumber(value) or M.warn_threshold())
+			end
+		end)
 	end
-	if not seeded_store then
-		seeded_store = zeron.store("spider_hidden_seeded_v2", false)
-	end
+
 	M.fetch_usage()
 	if wired then
 		return
 	end
 	wired = true
+	wired_zeron = zeron
+
+	local function add_listener(stop: (() -> ())?)
+		if type(stop) == "function" then
+			table.insert(stop_fns, stop)
+		end
+	end
 
 	pcall(function()
-		zeron.on("usage.changed", function()
+		add_listener(zeron.on("usage.changed", function()
 			M.fetch_usage()
-		end)
-		zeron.on("usage.reset", function()
+		end))
+		add_listener(zeron.on("usage.reset", function()
 			M.fetch_usage()
-		end)
-		zeron.on("limit.hit", function(e: any)
+		end))
+		add_listener(zeron.on("limit.hit", function(e: any)
 			M.fetch_usage()
 			local prov = tostring((e and e.provider) or "agent")
 			if current_hidden_map()[prov] then
@@ -431,39 +546,28 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 			local body = zeron.s("notify.quota_body", { provider = prov, window = win, pct = 0 })
 			push_event("quota", title, body, e and e.chat)
 			maybe_notify(title, body, e and e.chat)
-		end)
-		zeron.on("usage.threshold", function(e: any)
-			local prov = tostring((e and e.provider) or "agent")
-			if current_hidden_map()[prov] then
-				return
-			end
-			local pct = math.floor((tonumber(e and e.remaining) or 0) + 0.5)
-			local win = tostring((e and e.window) or "window")
-			local title = zeron.s("notify.quota_title", { pct = pct })
-			local body = zeron.s("notify.quota_body", { provider = prov, window = win, pct = pct })
-			push_event("quota", title, body, nil)
-			maybe_notify(title, body, nil)
-		end, { below = M.warn_threshold() })
+		end))
+		bind_threshold_listener(nil)
 
-		zeron.on("chat.awaiting_input", function(e: any)
+		add_listener(zeron.on("chat.awaiting_input", function(e: any)
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.awaiting_title")
 			local body = zeron.s("notify.awaiting_body", { title = stitle })
 			push_event("attention", title, body, cid)
 			maybe_notify(title, body, cid)
-		end)
+		end))
 
-		zeron.on("turn.errored", function(e: any)
+		add_listener(zeron.on("turn.errored", function(e: any)
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.errored_title")
 			local body = zeron.s("notify.errored_body", { title = stitle })
 			push_event("error", title, body, cid)
 			maybe_notify(title, body, cid)
-		end)
+		end))
 
-		zeron.on("turn.finished", function(e: any)
+		add_listener(zeron.on("turn.finished", function(e: any)
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.finished_title")
@@ -473,7 +577,7 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 			if not (win and win.active) then
 				maybe_notify(title, body, cid)
 			end
-		end)
+		end))
 	end)
 end
 

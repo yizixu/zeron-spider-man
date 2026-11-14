@@ -1,7 +1,7 @@
 {
   "id": "spider-man",
   "name": "蜘蛛侠",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
   "entry": "init.luau",
   "permissions": [
@@ -18,8 +18,9 @@
   "signature": {
     "key": "pcWlo9mZ00_vEnTKvrCXEKoa3TvvTMeiaeQ4AMHnCiI",
     "files": {
-      "README.md": "859321faf3bbb94603bc40b56a7131622009f4e49fde6be9be598ddf3e4c9e07",
-      "README.zh-CN.md": "4262f0aee69e5bb704c3b7c03ac9aab29a5a097180e25bf51877a6c4901c9ac5",
+      "LICENSE": "eaca14ccc6a94bd9c86b144da274d433a96f00614527cc258edafb7d4a43778f",
+      "README.md": "dd96c9640c665a67fd69b60eb8b54c97cb710edbe1ebdf1246728fb0c93fc5e4",
+      "README.zh-CN.md": "96bda0dace3606dd37c0baaf3daed48c76657cf8beb97aca5256b1db3a6f527d",
       "art/hanging-spider.webp": "0ec844466e97db3e6d9a51326fee7d9ae072c58892c3856381ac818e22cc176e",
       "art/sidebar-hanging-spider.webp": "615249addd136c42d2b7e6fd0efdb0d0585e736c34c6dc04ef559a926dcf89fa",
       "art/skyline-light.webp": "d7f5adcff97a4d86b1bd8ada07cc87ecc65b920ffaa234aa703f276bce5f734c",
@@ -31,19 +32,19 @@
       "art/web-near.webp": "7ad9200a70e2bd05bb49cbae20fc5b707d5550a6d828177c56b4bcae4d5af42a",
       "art/web-right-light.webp": "5ae3c0131a522dd251cd2cea0b41c05513921a71d9b49210d7584de48d52eefa",
       "art/web-right.webp": "2fbbca7053412e5d8dce6102d4fb831cc8cfe6829d643acc5cd7fce5545b4308",
-      "db.luau": "2527d063fa9c3973a1a37aaf13285e389ba0d4dc61c2c24d04fd56a08e528a75",
-      "hub.luau": "4a73917405ab8cf42ed7e7e02c2f442133f3f6b916e55a68114e19e4c65ce47b",
-      "icon.svg": "334a110205fec17895d620a68b453f1d19f702995495b841d54f89d5ab96ad1c",
-      "init.luau": "4b0e8cfd810c443c2fb153e61905cab51fd21cf1fd56c26f51924ce1d99693c4",
-      "layout.luau": "820453a20a17dd5882573e2ef2e9a83e966afc42f46c62f64b256d7b7b5bad32",
-      "locales/en.json": "10eb5d827a4f96a4a8b220788d2de9907a236a6779515772a53d42942ec7410a",
-      "locales/zh-Hans.json": "12b3b51b67256fd7a66bb80d7c79fe5eac4e8d86258f65742ff450b910eaf7eb",
-      "pet.luau": "47978211733fa9b9a892a2903997c99875939f765be4c25b181bcf00b53d54a1",
-      "radar.luau": "50c28d652de9908d746be30643f9960b3c0a50a680c2dd64336956f4c7bcb326",
+      "db.luau": "b6147a2d5964ad54a42131d6878ee7843e82a1dc186dbfc9f525906fa4c4c3f8",
+      "hub.luau": "bc90f1acbe25a30d3e2b48ccf43fa95672527cd54ea7a5d10bb184a63f82e9c3",
+      "icon.svg": "d57a40e73bc9c956728b7ed8465a0f2cfe21eb983375bc70f99fd35668bdc70b",
+      "init.luau": "61a656299997a792a2915ec4a2607ebb52d1f2df94da469a595d662830d5750d",
+      "layout.luau": "162e989ca8f933d61f7a5ebdf3e1ffa28ba7cfe8c7657afaf65ea1ae03a8305b",
+      "locales/en.json": "7cec9bee7ccfbad2c10613542ee475b37bfb689fd3bf9f7864c444bcc9dfbdf9",
+      "locales/zh-Hans.json": "66bc2cb787439be110cfd93901f710e934adb87354df79e874c936eff34121e0",
+      "pet.luau": "19283af5214b9d61761e88469039c8dd973150845cf9733729404fd15fc7aad6",
+      "radar.luau": "2f07b7082070bc1697dc9fc7bb1e7ac85f62021f7d53ec8bb4b5f0e2bc907be4",
       "web_gauge.luau": "ebfa63a379c636360aff5900866d74be0e89ae504e4ef13957fe1b6d03384890",
       "zeron.luau": "0ef4194bdf34ac0f30315e783972fdc82c05d4269f22d885e15cb59430cb2cd7"
     },
-    "sig": "89VVo6JOwVVcBP4RkQpd1NIpiQeTngZiDWfyYa0ASyO5Ycy71vrFqVKkhvVUioW9VobpZ8Jx3NSi5QZI4CWHAw"
+    "sig": "kQHKkZdXlTP90F2KGuUACCHDLqbTlzTEW25gStNsGQi29cU7VfNzgretz2eB3OWHJBnEzamtjzBEvsmWEZ-tDg"
   },
   "icon": "icon.svg",
   "ui": {
@@ -84,14 +85,6 @@
           "label": "深邃"
         }
       ]
-    },
-    {
-      "id": "show_badge",
-      "kind": "switch",
-      "section": "蜘蛛感应雷达",
-      "label": "蜘蛛感应状态胶囊",
-      "description": "在左侧边栏顶部显示实时任务与额度警戒胶囊。",
-      "default": true
     },
     {
       "id": "notify_events",

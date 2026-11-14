@@ -19,6 +19,10 @@ local function clamp(v: number, lo: number, hi: number): number
 	return v
 end
 
+function M.reset()
+	refs = {}
+end
+
 function M.ref(name: string): any
 	local r = refs[name]
 	if not r then

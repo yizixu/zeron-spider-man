@@ -104,7 +104,30 @@ local WHISPERS_IDLE = {
 	"pet.whisper_4",
 }
 
-local QUICK_INSPECT_PROMPT = "请帮我快速回顾当前进展：有哪些已完成、哪些边界条件还没验证、接下来最优先的一步是什么？"
+-- Module-local PRNG state (avoids mutating global Lua math.randomseed)
+local rng_state = 2463534242
+
+local function rand_seed(seed: number)
+	local v = math.floor(seed) % 2147483647
+	if v <= 0 then
+		v = 135792468
+	end
+	rng_state = v
+end
+
+local function rand_float(): number
+	rng_state = (rng_state * 48271) % 2147483647
+	return (rng_state - 1) / 2147483646
+end
+
+local function rand_int(lo: number, hi: number): number
+	local a = math.floor(lo)
+	local b = math.floor(hi)
+	if b <= a then
+		return a
+	end
+	return a + math.floor(rand_float() * (b - a + 1))
+end
 
 local function clamp(v: number, lo: number, hi: number): number
 	if hi < lo then
@@ -425,13 +448,19 @@ local function SpunWebCanvas(props: { web: () -> SpunWeb?, now_fn: () -> number 
 	}
 end
 
-function M.register(zeron: any, show_pet: any)
+function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_cleanup_cb: (() -> ())?)
 	zeron_ref = zeron
-	math.randomseed(math.floor((ui.now() % 1000000)))
+	rand_seed(ui.now() % 2147483646 + 1)
 
 	zeron.place {
 		at = "#titlebar",
 		after = function(): Node
+			if on_mount_cb then
+				pcall(on_mount_cb)
+			end
+			if on_cleanup_cb then
+				pcall(ui.on_cleanup, on_cleanup_cb)
+			end
 			local win_w = layout.win_w
 			local stage_y = layout.stage_y
 
@@ -502,34 +531,34 @@ function M.register(zeron: any, show_pet: any)
 					table.insert(choices, 6)
 				end
 
-				if prefer_edge or math.random() < 0.96 then
-					local spot = choices[math.random(1, #choices)]
+				if prefer_edge or rand_float() < 0.96 then
+					local spot = choices[rand_int(1, #choices)]
 					if spot == 1 then
 						local x1 = math.floor(z.sidebar_r + 22)
 						local x2 = math.max(x1 + 8, math.floor(z.text_x1 - 24))
-						return math.random(x1, x2), math.random(68, math.max(120, H_up - 32))
+						return rand_int(x1, x2), rand_int(68, math.max(120, H_up - 32))
 					elseif spot == 2 then
 						local x1 = math.floor(z.text_x2 + 24)
 						local x2 = math.max(x1 + 8, math.floor(z.right_l - 36))
-						return math.random(x1, x2), math.random(68, math.max(120, H_up - 32))
+						return rand_int(x1, x2), rand_int(68, math.max(120, H_up - 32))
 					elseif spot == 3 then
-						return clamp(math.floor(z.sidebar_r) + math.random(12, 24), 40, z.right_l - 46), math.random(64, math.max(120, H_up - 20))
+						return clamp(math.floor(z.sidebar_r) + rand_int(12, 24), 40, z.right_l - 46), rand_int(64, math.max(120, H_up - 20))
 					elseif spot == 4 then
-						return math.random(44, math.max(120, math.floor(W - 56))), H_up - math.random(4, 22)
+						return rand_int(44, math.max(120, math.floor(W - 56))), H_up - rand_int(4, 22)
 					elseif spot == 5 then
 						local edge_x = if z.panel_l > 0 then math.floor(z.right_l - 24) else math.floor(W - 38)
-						return clamp(edge_x + math.random(-8, 8), 44, W - 28), math.random(64, math.max(120, H_up - 24))
+						return clamp(edge_x + rand_int(-8, 8), 44, W - 28), rand_int(64, math.max(120, H_up - 24))
 					else
-						if right_gap >= 64 and (left_gap < 64 or math.random() < 0.6) then
+						if right_gap >= 64 and (left_gap < 64 or rand_float() < 0.6) then
 							local x1 = math.floor(z.text_x2 + 24)
-							return math.random(x1, math.max(x1 + 8, math.floor(z.right_l - 36))), math.random(46, 72)
+							return rand_int(x1, math.max(x1 + 8, math.floor(z.right_l - 36))), rand_int(46, 72)
 						else
 							local x1 = math.floor(z.sidebar_r + 22)
-							return math.random(x1, math.max(x1 + 8, math.floor(z.text_x1 - 22))), math.random(46, 72)
+							return rand_int(x1, math.max(x1 + 8, math.floor(z.text_x1 - 22))), rand_int(46, 72)
 						end
 					end
 				end
-				return math.random(70, math.max(120, W - 70)), math.random(H_up - 36, H_up - 8)
+				return rand_int(70, math.max(120, W - 70)), rand_int(H_up - 36, H_up - 8)
 			end
 
 			local slots: { SpiderSlot } = {}
@@ -613,7 +642,7 @@ function M.register(zeron: any, show_pet: any)
 					id = web_seq,
 					x = x,
 					by = by,
-					radius = math.random(28, 38),
+					radius = rand_int(28, 38),
 					born = ui.now() / 1000,
 					life = 22,
 				})
@@ -659,13 +688,21 @@ function M.register(zeron: any, show_pet: any)
 				if menu_slot_idx:peek() == slot.idx then
 					menu_slot_idx:set(0)
 				end
+				if motion.reduced() then
+					slot.whisper:set(nil)
+					slot.active:set(false)
+					slot.sid = nil
+					slot.phase:set("idle")
+					sync_rev:set(sync_rev:peek() + 1)
+					return
+				end
 
 				local W = math.max(360, win_w:peek())
 				local H_up = max_by()
 				local p = slot.pose:peek()
 				local sx0, by0 = p.x, p.by
 
-				local offset_x = math.random(90, 260) * (if math.random() < 0.5 then -1 else 1)
+				local offset_x = rand_int(90, 260) * (if rand_float() < 0.5 then -1 else 1)
 				local ax = clamp(sx0 + offset_x, 56, W - 56)
 				if math.abs(ax - sx0) < 60 then
 					ax = clamp(sx0 + (if sx0 < W * 0.5 then 140 else -140), 56, W - 56)
@@ -906,22 +943,63 @@ function M.register(zeron: any, show_pet: any)
 				meta_rev:set(meta_rev:peek() + 1)
 			end)
 
-			-- Pure animation timer
+			-- Pure animation timer (stopped automatically when hidden/disabled or reduced-motion is enabled)
 			ui.effect(function()
-				if show_pet:get() ~= true then
+				if show_pet:get() ~= true or motion.reduced() then
+					for _, sl in slots do
+						if sl.active:peek() and sl.phase:peek() == "swing" then
+							sl.active:set(false)
+							sl.sid = nil
+							sl.phase:set("idle")
+						end
+					end
+					if stage_had_content then
+						stage_had_content = false
+						local w0 = math.max(360, tonumber(win_w:peek()) or 1280)
+						local h0 = max_by(false)
+						stage_snapshot:set({
+							w = w0,
+							h_up = h0,
+							zones = compute_zones(w0, h0, false),
+							webs = {},
+							pets = {},
+						})
+					end
 					return
 				end
 				local last_tick_ms = ui.now()
 				local last_layout_ms = 0
+				local tick_seq = 0
 				local cached_W = math.max(360, tonumber(win_w:peek()) or 1280)
 				local cached_H_up = max_by(false)
 				return ui.every(TICK_MS, function()
 					local now_ms = ui.now()
 					local dt = clamp((now_ms - last_tick_ms) / 1000, 0.004, 0.05)
 					last_tick_ms = now_ms
+					tick_seq += 1
 
 					local win = zeron.window(true)
 					if not win.shown or motion.reduced() then
+						return
+					end
+					local any_active = false
+					for _, sl in slots do
+						if sl.active:peek() then
+							any_active = true
+							break
+						end
+					end
+					if not any_active and not has_webs then
+						if stage_had_content then
+							stage_had_content = false
+							stage_snapshot:set({
+								w = cached_W,
+								h_up = cached_H_up,
+								zones = compute_zones(cached_W, cached_H_up, false),
+								webs = {},
+								pets = {},
+							})
+						end
 						return
 					end
 
@@ -1004,11 +1082,15 @@ function M.register(zeron: any, show_pet: any)
 									sl.pose:set(p)
 								end
 							elseif ph == "completed" then
-								p.wp += dt * 3.5
-								sl.pose:set(p)
+								if (tick_seq + sl.idx) % 4 == 0 then
+									p.wp += dt * 14.0
+									sl.pose:set(p)
+								end
 							elseif open_idx == sl.idx then
-								p.wp += dt * 3.0
-								sl.pose:set(p)
+								if (tick_seq + sl.idx) % 4 == 0 then
+									p.wp += dt * 12.0
+									sl.pose:set(p)
+								end
 							elseif ph == "walk" then
 								local dx = sl.tx - p.x
 								local dby = sl.tby - p.by
@@ -1016,7 +1098,7 @@ function M.register(zeron: any, show_pet: any)
 								local dist = math.sqrt(dx * dx + dy_screen * dy_screen)
 								if dist < 8 then
 									local in_txt = is_in_text_zone(p.x, p.by, W, H_up, false)
-									local roll = math.random()
+									local roll = rand_float()
 									if roll < 0.22 and not in_txt then
 										sl.pose:set(p)
 										start_weave(sl)
@@ -1025,12 +1107,12 @@ function M.register(zeron: any, show_pet: any)
 										start_rappel(sl)
 									else
 										sl.phase:set("peek")
-										sl.mode_until = now_s + (1.8 + math.random() * 2.4)
-										if math.random() < 0.18 and sl.whisper:peek() == nil then
+										sl.mode_until = now_s + (1.8 + rand_float() * 2.4)
+										if rand_float() < 0.18 and sl.whisper:peek() == nil then
 											if sl.kind == "working" then
 												say_slot(sl, short_title(sl.title, 12), 3.2)
 											else
-												local wk = WHISPERS_IDLE[math.random(1, #WHISPERS_IDLE)]
+												local wk = WHISPERS_IDLE[rand_int(1, #WHISPERS_IDLE)]
 												say_slot(sl, zeron.s(wk), 3.2)
 											end
 										end
@@ -1052,16 +1134,18 @@ function M.register(zeron: any, show_pet: any)
 									sl.pose:set(p)
 								end
 							elseif ph == "peek" then
-								p.wp += dt * 4
-								p.look = math.sin(now_s * 3.2 + sl.idx)
 								if now_s >= sl.mode_until then
 									p.look = 0
 									local nx, nby = pick_target(false)
 									sl.tx = nx
 									sl.tby = nby
 									sl.phase:set("walk")
+									sl.pose:set(p)
+								elseif (tick_seq + sl.idx) % 4 == 0 then
+									p.wp += dt * 16.0
+									p.look = math.sin(now_s * 3.2 + sl.idx)
+									sl.pose:set(p)
 								end
-								sl.pose:set(p)
 							elseif ph == "weave" then
 								sl.weave_angle += dt * 4.5
 								local r = 10
@@ -1689,14 +1773,14 @@ function M.register(zeron: any, show_pet: any)
 							on_click = function()
 								local list = db.prompts()
 								if active_chat_id ~= nil then
-									zeron.compose(QUICK_INSPECT_PROMPT)
+									zeron.compose(zeron.s("pet.inspect_prompt"))
 									zeron.toast(zeron.s("pet.toast_composed"))
 								elseif #list > 0 then
-									local p_item = list[math.random(1, #list)]
+									local p_item = list[rand_int(1, #list)]
 									zeron.compose(p_item.content)
 									zeron.toast(zeron.s("pet.toast_prompt", { title = p_item.title }))
 								else
-									zeron.compose(QUICK_INSPECT_PROMPT)
+									zeron.compose(zeron.s("pet.inspect_prompt"))
 									zeron.toast(zeron.s("pet.toast_composed"))
 								end
 								menu_slot_idx:set(0)

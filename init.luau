@@ -1,6 +1,5 @@
 --!strict
 local zeron = require("./zeron")("spider-man")
-local Badge = require("@ds/badge")
 local Button = require("@ds/button")
 local Icon = require("@ds/icon")
 local material = require("@ds/material")
@@ -13,7 +12,6 @@ local pet = require("./pet")
 local layout = require("./layout")
 
 local parallax = zeron.setting("parallax")
-local show_badge = zeron.setting("show_badge")
 local notify_events = zeron.setting("notify_events")
 local quota_warn_pct = zeron.setting("quota_warn_pct")
 local show_composer_deco = zeron.setting("show_composer_deco")
@@ -23,10 +21,11 @@ local show_pet = zeron.setting("show_pet")
 
 local active_tab = ui.state("spider_hub_tab", "radar")
 
+layout.reset()
 db.init(zeron)
 radar.init(zeron, notify_events, quota_warn_pct)
 hub.register(zeron, active_tab)
-pet.register(zeron, show_pet)
+pet.register(zeron, show_pet, radar.ensure_wired, radar.cleanup)
 
 local STEP_X, STEP_Y = 16, 10
 local REACH = { off = 0, subtle = 0.5, normal = 1, deep = 1.8 } :: { [string]: number }
@@ -103,7 +102,7 @@ local function SpiderScene(reach: number, pointer: () -> any, light: boolean): N
 		relative = true,
 		overflow = "hidden",
 		role = "img",
-		label = "Spider-Verse NYC Skyline",
+		label = zeron.t("wallpaper.aria_label"),
 		layer(if light then "art/skyline-light.webp" else "art/skyline.webp", 0.6),
 		layer(if light then "art/web-near-light.webp" else "art/web-near.webp", 1.8),
 	}
@@ -234,7 +233,7 @@ zeron.place {
 				if not prompts_open:get() then
 					return ""
 				end
-				return `open:{#db.prompts()}`
+				return `open:{#db.prompts()}:{db.rev()}`
 			end, function(key: string): Node
 				if key == "" then
 					return ui.div { h = 0 }
@@ -350,7 +349,7 @@ zeron.place {
 			w_full = true,
 			shrink = 0,
 			ui.show(function(): boolean
-				return show_sidebar_deco:get() == true or show_badge:get() == true
+				return show_sidebar_deco:get() == true
 			end, ui.column {
 			id = "spider-sidebar-footer",
 			w_full = true,

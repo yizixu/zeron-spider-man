@@ -12,30 +12,28 @@ export type Snippet = {
 
 local ITEMS: State<{ Snippet }> = ui.state("spider_db_items", {} :: { Snippet })
 local READY: State<boolean> = ui.state("spider_db_ready", false)
+local REV: State<number> = ui.state("spider_db_rev", 0)
 local zeron_ref: any = nil
+local seeding_in_flight = false
 
-local DEFAULT_PROMPTS = {
-	{
-		title = "代码审查",
-		content = "请重点审查当前改动中的边界条件、并发/异步竞态、错误处理与潜在性能问题，按严重程度列出问题及最小修复建议。",
-	},
-	{
-		title = "定位报错",
-		content = "请先分析这个报错的根因、触发条件与完整调用链，再给出最直接可靠的修复方案和验证命令。",
-	},
-	{
-		title = "补充单测",
-		content = "请为当前改动补充覆盖正常路径、边界条件与异常分支的单元测试，并运行测试确认全部通过。",
-	},
-	{
-		title = "改动总结",
-		content = "请用简洁要点总结本次涉及的文件、核心逻辑变更、潜在风险以及下一步建议的验证步骤。",
-	},
-	{
-		title = "Commit 信息",
-		content = "请根据当前改动生成 1 条简洁准确的 Conventional Commits 提交信息（附带简短要点说明）。",
-	},
-}
+local DEFAULT_PROMPT_KEYS = { "1", "2", "3", "4", "5" }
+
+local function is_valid_kind(kind: string): boolean
+	return kind == "prompt" or kind == "snippet"
+end
+
+local function sql_str(s: string): string
+	return "'" .. string.gsub(s, "'", "''") .. "'"
+end
+
+local function notify_db_error(key: string, err: any)
+	print("spider-man db error:", err)
+	if zeron_ref then
+		pcall(function()
+			zeron_ref.toast(zeron_ref.s(key))
+		end)
+	end
+end
 
 local function reload()
 	if not zeron_ref then
@@ -56,6 +54,7 @@ local function reload()
 				})
 			end
 			ITEMS:set(out)
+			REV:set(REV:peek() + 1)
 			READY:set(true)
 		end, function(err: any)
 			print("spider-man db query error:", err)
@@ -74,36 +73,52 @@ function M.init(zeron: any)
 				content TEXT NOT NULL,
 				project TEXT,
 				created_at INTEGER NOT NULL
-			)
+			);
+			CREATE TABLE IF NOT EXISTS spider_meta (
+				k TEXT PRIMARY KEY,
+				v TEXT NOT NULL
+			);
 		]])
 		:after(function()
-			if not seeded:peek() then
-				seeded:set(true)
+			if not seeded:peek() and not seeding_in_flight then
+				seeding_in_flight = true
+				local now = math.floor(os.time())
+				local selects: { string } = {}
+				for _, idx in DEFAULT_PROMPT_KEYS do
+					local title = sql_str(zeron.s(`db.p{idx}_title`))
+					local body = sql_str(zeron.s(`db.p{idx}_content`))
+					table.insert(selects, `SELECT 'prompt' AS kind, {title} AS title, {body} AS content`)
+				end
+				local union_sql = table.concat(selects, " UNION ALL ")
+				local script = table.concat({
+					"BEGIN IMMEDIATE;",
+					"INSERT OR IGNORE INTO spider_meta (k, v) SELECT 'seeded_v1', '1' WHERE EXISTS (SELECT 1 FROM spider_snippets);",
+					`INSERT INTO spider_snippets (kind, title, content, project, created_at) SELECT kind, title, content, '', {now} FROM ({union_sql}) WHERE NOT EXISTS (SELECT 1 FROM spider_meta WHERE k = 'seeded_v1');`,
+					"INSERT OR IGNORE INTO spider_meta (k, v) VALUES ('seeded_v1', '1');",
+					"COMMIT;",
+				}, "\n")
+
+				-- Single atomic transaction: rolls back cleanly on error so future startups retry.
 				zeron.db
-					.query("SELECT COUNT(*) AS cnt FROM spider_snippets")
-					:after(function(rows: { any })
-						local cnt = (rows and rows[1] and tonumber(rows[1].cnt)) or 0
-						if cnt == 0 then
-							local now = os.time()
-							local pending = #DEFAULT_PROMPTS
-							for _, item in DEFAULT_PROMPTS do
-								zeron.db
-									.exec(
-										"INSERT INTO spider_snippets (kind, title, content, project, created_at) VALUES (?, ?, ?, ?, ?)",
-										{ "prompt", item.title, item.content, "", now }
-									)
-									:after(function()
-										pending -= 1
-										if pending <= 0 then
-											reload()
-										end
-									end)
-							end
-						else
+					.exec(script)
+					:after(function()
+						seeding_in_flight = false
+						seeded:set(true)
+						reload()
+					end, function(err: any)
+						print("spider-man db atomic seed error:", err)
+						local function finish()
+							seeding_in_flight = false
 							reload()
 						end
-					end, function()
-						reload()
+						local ok_rb, rb_promise = pcall(function()
+							return zeron.db.exec("ROLLBACK;")
+						end)
+						if ok_rb and rb_promise then
+							rb_promise:after(finish, finish)
+						else
+							finish()
+						end
 					end)
 			else
 				reload()
@@ -131,8 +146,12 @@ function M.ready(): boolean
 	return READY:get()
 end
 
+function M.rev(): number
+	return REV:get()
+end
+
 function M.add(kind: string, title: string, content: string, project: string?, on_done: (() -> ())?)
-	if not zeron_ref then
+	if not zeron_ref or not is_valid_kind(kind) then
 		return
 	end
 	local t = string.gsub(title, "^%s*(.-)%s*$", "%1")
@@ -151,7 +170,7 @@ function M.add(kind: string, title: string, content: string, project: string?, o
 				on_done()
 			end
 		end, function(err: any)
-			print("spider-man db add error:", err)
+			notify_db_error("db.save_failed", err)
 		end)
 end
 
@@ -172,12 +191,12 @@ function M.update(id: number, title: string, content: string, on_done: (() -> ()
 				on_done()
 			end
 		end, function(err: any)
-			print("spider-man db update error:", err)
+			notify_db_error("db.save_failed", err)
 		end)
 end
 
 function M.set_kind(id: number, kind: string, on_done: (() -> ())?)
-	if not zeron_ref then
+	if not zeron_ref or not is_valid_kind(kind) then
 		return
 	end
 	zeron_ref.db
@@ -188,17 +207,28 @@ function M.set_kind(id: number, kind: string, on_done: (() -> ())?)
 				on_done()
 			end
 		end, function(err: any)
-			print("spider-man db set_kind error:", err)
+			notify_db_error("db.save_failed", err)
 		end)
 end
 
-function M.remove(id: number)
+function M.remove(id: number, on_done: (() -> ())?, on_err: ((any) -> ())?)
 	if not zeron_ref then
 		return
 	end
-	zeron_ref.db.exec("DELETE FROM spider_snippets WHERE id = ?", { id }):after(function()
-		reload()
-	end)
+	zeron_ref.db
+		.exec("DELETE FROM spider_snippets WHERE id = ?", { id })
+		:after(function()
+			reload()
+			if on_done then
+				on_done()
+			end
+		end, function(err: any)
+			if on_err then
+				on_err(err)
+			else
+				notify_db_error("db.delete_failed", err)
+			end
+		end)
 end
 
 return M

@@ -22,11 +22,6 @@
         "deep": "Deep"
       }
     },
-    "show_badge": {
-      "title": "Spider-Sense radar pill",
-      "description": "Show live task & quota radar badge in the sidebar header.",
-      "section": "Radar"
-    },
     "notify_events": {
       "title": "Spider-Sense notifications",
       "description": "Notify when a background session needs input/approval, errors, or quota drops low.",
@@ -51,17 +46,15 @@
       "title": "Sidebar spider elements",
       "description": "Show the Spider-Net divider and dangling spider patrol footer in the left sidebar.",
       "section": "Interface"
+    },
+    "show_pet": {
+      "title": "Panel roaming Spidey pet",
+      "description": "Keep an interactive Spider-Pet roaming, spinning webs, rappelling, and tracking sessions across the workspace.",
+      "section": "Interface"
     }
   },
   "page": {
     "title": "Spider Hub"
-  },
-  "badge": {
-    "label": "Spider-Sense",
-    "tooltip": "Click to open Spider Hub or jump to pending sessions",
-    "working": "Working · {n}",
-    "attention": "Action · {n}",
-    "low_quota": "Quota {pct}%"
   },
   "composer": {
     "tagline": "Friendly Neighborhood · Quick Prompts",
@@ -141,7 +134,8 @@
     "status_working": "Running",
     "status_attention": "Needs You",
     "status_failed": "Attention",
-    "updated_toast": "Spider-Web item updated"
+    "updated_toast": "Spider-Web item updated",
+    "refresh_failed": "Failed to refresh account quota"
   },
   "notify": {
     "awaiting_title": "Spider-Sense: Action Needed",
@@ -197,6 +191,24 @@
     "kind_attention": "Attention",
     "kind_working": "Working",
     "kind_current": "Active",
-    "kind_patrol": "Patrol"
+    "kind_patrol": "Patrol",
+    "inspect_prompt": "Please quickly review our current progress: what's completed, which edge cases still need verification, and what's the highest-priority next step?"
+  },
+  "wallpaper": {
+    "aria_label": "Spider-Verse NYC Skyline"
+  },
+  "db": {
+    "p1_title": "Code Review",
+    "p1_content": "Please focus on reviewing edge cases, concurrency/async races, error handling, and potential performance issues in the current changes, listed by severity with minimal fix suggestions.",
+    "p2_title": "Debug Error",
+    "p2_content": "Please analyze the root cause, trigger conditions, and full call chain of this error first, then provide the most direct reliable fix and verification command.",
+    "p3_title": "Add Unit Tests",
+    "p3_content": "Please add unit tests covering normal paths, edge cases, and error branches for the current changes, and run the suite to confirm all pass.",
+    "p4_title": "Change Summary",
+    "p4_content": "Please summarize the affected files, core logic changes, potential risks, and recommended next verification steps in concise bullet points.",
+    "p5_title": "Commit Message",
+    "p5_content": "Please write 1 concise and accurate Conventional Commits message based on the current changes (with short bullet notes).",
+    "save_failed": "Failed to save item to Spider-Web",
+    "delete_failed": "Failed to delete item from Spider-Web"
   }
 }

@@ -102,7 +102,7 @@ function M.register(zeron: any, active_tab: State<string>)
 			local edit_title = ui.use_state("")
 			local edit_content = ui.use_state("")
 
-			local function stat_card(value_fn: () -> string, label: string, tone_fn: () -> string, icon_name: string, bar_color: string): Node
+			local function stat_card(value_fn: string | () -> string, label: string, tone_fn: string | () -> string, icon_name: string, bar_color: string): Node
 				return ui.row {
 					grow = 1,
 					min_w = 140,
@@ -650,21 +650,27 @@ function M.register(zeron: any, active_tab: State<string>)
 						w_full = true,
 						flex_wrap = true,
 						gap = "$space.3",
-						stat_card(function(): string
-							return tostring(#radar.summary().working)
-						end, zeron.s("hub.stat_working"), function(): string
-							return if #radar.summary().working > 0 then "$accent" else "$text.primary"
-						end, "status-working", "$accent"),
-						stat_card(function(): string
-							return tostring(#radar.summary().attention)
-						end, zeron.s("hub.stat_attention"), function(): string
-							return if #radar.summary().attention > 0 then "$zeron.tone.warning.ink" else "$text.primary"
-						end, "status-input", "$zeron.tone.warning.ink"),
-						stat_card(function(): string
-							return tostring(#radar.summary().failed)
-						end, zeron.s("hub.stat_failed"), function(): string
-							return if #radar.summary().failed > 0 then "$zeron.tone.danger.ink" else "$text.primary"
-						end, "danger-triangle", "$zeron.tone.danger.ink"),
+						stat_card(
+							tostring(#sum.working),
+							zeron.s("hub.stat_working"),
+							if #sum.working > 0 then "$accent" else "$text.primary",
+							"status-working",
+							"$accent"
+						),
+						stat_card(
+							tostring(#sum.attention),
+							zeron.s("hub.stat_attention"),
+							if #sum.attention > 0 then "$zeron.tone.warning.ink" else "$text.primary",
+							"status-input",
+							"$zeron.tone.warning.ink"
+						),
+						stat_card(
+							tostring(#sum.failed),
+							zeron.s("hub.stat_failed"),
+							if #sum.failed > 0 then "$zeron.tone.danger.ink" else "$text.primary",
+							"danger-triangle",
+							"$zeron.tone.danger.ink"
+						),
 						stat_card(function(): string
 							local mq = radar.min_quota()
 							return if mq ~= nil then `{math.floor(mq + 0.5)}%` else "—"
@@ -1172,7 +1178,7 @@ function M.register(zeron: any, active_tab: State<string>)
 								exp_n += 1
 							end
 						end
-						return `{filter_kind:get()}:{search:get()}:{#items}:{first_id}:{exp_n}:{editing_id:get()}`
+						return `{filter_kind:get()}:{search:get()}:{#items}:{first_id}:{db.rev()}:{exp_n}:{editing_id:get()}`
 					end, function(): Node
 						return build_web_cards()
 					end, { w_full = true }),
@@ -1283,18 +1289,22 @@ function M.register(zeron: any, active_tab: State<string>)
 									}),
 									ui.presence(function(): string
 									local s = radar.summary()
-									return `{#s.attention}:{#s.failed}:{#s.working}:{tostring(s.low_quota)}`
-								end, function(): Node
-									local s = radar.summary()
-									local alert = #s.attention > 0 or #s.failed > 0 or s.low_quota
+									return `{#s.attention}:{#s.failed}:{#s.working}:{if s.low_quota then "1" else "0"}`
+								end, function(key: string): Node
+									local attn_s, fail_s, work_s, low_s = string.match(key, "^(%d+):(%d+):(%d+):([01])$")
+									local attn = tonumber(attn_s) or 0
+									local fail = tonumber(fail_s) or 0
+									local work = tonumber(work_s) or 0
+									local low = low_s == "1"
+									local alert = attn > 0 or fail > 0 or low
 									local label = if alert
 										then zeron.s("hub.hero_alert")
-										elseif #s.working > 0 then zeron.s("hub.hero_working", { n = #s.working })
+										elseif work > 0 then zeron.s("hub.hero_working", { n = work })
 										else zeron.s("hub.hero_calm")
-									local tone = if #s.failed > 0 or s.low_quota
+									local tone = if fail > 0 or low
 										then "danger"
-										elseif #s.attention > 0 then "warning"
-										elseif #s.working > 0 then "accent"
+										elseif attn > 0 then "warning"
+										elseif work > 0 then "accent"
 										else "success"
 									return Badge.Badge {
 										label,
@@ -1338,11 +1348,14 @@ function M.register(zeron: any, active_tab: State<string>)
 								return "web"
 							end
 							local s = radar.summary()
-							local accts = radar.usage_accounts()
-							local vis = radar.visible_accounts()
-							local evs = radar.events()
+							local sig_parts: { string } = {}
+							for _, list in { s.attention, s.working, s.failed } do
+								for _, it in list do
+									table.insert(sig_parts, `{it.id}:{it.status}`)
+								end
+							end
 							local dopen = if filter_drawer_open:get() then "1" else "0"
-							return `radar:{#s.working}:{#s.attention}:{#s.failed}:{tostring(radar.min_quota())}:{#accts}:{#vis}:{radar.hidden_rev()}:{#evs}:{radar.warn_threshold()}:{dopen}`
+							return `radar:{table.concat(sig_parts, ",")}:{radar.usage_rev()}:{radar.hidden_rev()}:{radar.events_rev()}:{radar.warn_threshold()}:{dopen}`
 						end, function(key: string): Node
 							if key == "web" then
 								return build_web_tab()

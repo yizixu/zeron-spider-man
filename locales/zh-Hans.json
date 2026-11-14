@@ -22,11 +22,6 @@
         "deep": "深邃"
       }
     },
-    "show_badge": {
-      "title": "蜘蛛感应状态胶囊",
-      "description": "在左侧边栏顶部显示实时任务与额度警戒胶囊。",
-      "section": "感应雷达"
-    },
     "notify_events": {
       "title": "蜘蛛感应系统通知",
       "description": "后台会话等待确认、报错、完成或账号余量过低时自动弹通知提醒。",
@@ -51,17 +46,15 @@
       "title": "左侧边栏蜘蛛装饰",
       "description": "在左侧边栏顶部显示蛛网分隔条，底部显示倒挂巡逻的小蜘蛛。",
       "section": "界面装饰"
+    },
+    "show_pet": {
+      "title": "面板漫游小蜘蛛",
+      "description": "在窗口面板上放养一只会四处爬行、织网、垂丝并与会话交互的蜘蛛伙伴。",
+      "section": "界面装饰"
     }
   },
   "page": {
     "title": "蛛网中心"
-  },
-  "badge": {
-    "label": "蜘蛛感应",
-    "tooltip": "点击打开蛛网中心；有待确认会话时将直接跳转",
-    "working": "巡逻 · {n}",
-    "attention": "待确认 · {n}",
-    "low_quota": "余量 {pct}%"
   },
   "composer": {
     "tagline": "好邻居 · 快捷指令",
@@ -141,7 +134,8 @@
     "status_working": "运行中",
     "status_attention": "待确认",
     "status_failed": "异常",
-    "updated_toast": "已更新蛛网条目"
+    "updated_toast": "已更新蛛网条目",
+    "refresh_failed": "刷新账号额度失败"
   },
   "notify": {
     "awaiting_title": "蜘蛛感应：需要你确认",
@@ -197,6 +191,24 @@
     "kind_attention": "待确认",
     "kind_working": "运行中",
     "kind_current": "当前会话",
-    "kind_patrol": "自由巡逻"
+    "kind_patrol": "自由巡逻",
+    "inspect_prompt": "请帮我快速回顾当前进展：有哪些已完成、哪些边界条件还没验证、接下来最优先的一步是什么？"
+  },
+  "wallpaper": {
+    "aria_label": "蜘蛛侠纽约天际线"
+  },
+  "db": {
+    "p1_title": "代码审查",
+    "p1_content": "请重点审查当前改动中的边界条件、并发/异步竞态、错误处理与潜在性能问题，按严重程度列出问题及最小修复建议。",
+    "p2_title": "定位报错",
+    "p2_content": "请先分析这个报错的根因、触发条件与完整调用链，再给出最直接可靠的修复方案和验证命令。",
+    "p3_title": "补充单测",
+    "p3_content": "请为当前改动补充覆盖正常路径、边界条件与异常分支的单元测试，并运行测试确认全部通过。",
+    "p4_title": "改动总结",
+    "p4_content": "请用简洁要点总结本次涉及的文件、核心逻辑变更、潜在风险以及下一步建议的验证步骤。",
+    "p5_title": "Commit 信息",
+    "p5_content": "请根据当前改动生成 1 条简洁准确的 Conventional Commits 提交信息（附带简短要点说明）。",
+    "save_failed": "保存到蛛网失败",
+    "delete_failed": "删除蛛网条目失败"
   }
 }
