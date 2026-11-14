@@ -1,0 +1,202 @@
+{
+  "name": "蜘蛛侠 (Spider-Man)",
+  "description": "蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
+  "settings": {
+    "wallpaper": {
+      "title": "新对话壁纸",
+      "description": "使用暗夜纽约天际线作为新对话背景。",
+      "section": "壁纸",
+      "options": {
+        "on": "蜘蛛侠纽约天际线",
+        "off": "关闭"
+      }
+    },
+    "parallax": {
+      "title": "3D 视差深度",
+      "description": "城市天际线与前景蛛网随鼠标移动的幅度。",
+      "section": "动效",
+      "options": {
+        "off": "关闭",
+        "subtle": "轻微",
+        "normal": "标准",
+        "deep": "深邃"
+      }
+    },
+    "show_badge": {
+      "title": "蜘蛛感应状态胶囊",
+      "description": "在左侧边栏顶部显示实时任务与额度警戒胶囊。",
+      "section": "感应雷达"
+    },
+    "notify_events": {
+      "title": "蜘蛛感应系统通知",
+      "description": "后台会话等待确认、报错、完成或账号余量过低时自动弹通知提醒。",
+      "section": "感应雷达"
+    },
+    "quota_warn_pct": {
+      "title": "额度警戒线",
+      "description": "当账号剩余额度低于该比例时触发红色蜘蛛感应警戒。",
+      "section": "感应雷达"
+    },
+    "show_composer_deco": {
+      "title": "输入框蛛网与快捷指令条",
+      "description": "在对话框下方显示蛛网装饰与一键填词快捷指令栏。",
+      "section": "效率工具"
+    },
+    "show_quick_save": {
+      "title": "消息「存到蛛网」按钮",
+      "description": "鼠标悬停对话消息时显示一键收藏到蛛网按钮。",
+      "section": "效率工具"
+    },
+    "show_sidebar_deco": {
+      "title": "左侧边栏蜘蛛装饰",
+      "description": "在左侧边栏顶部显示蛛网分隔条，底部显示倒挂巡逻的小蜘蛛。",
+      "section": "界面装饰"
+    }
+  },
+  "page": {
+    "title": "蛛网中心"
+  },
+  "badge": {
+    "label": "蜘蛛感应",
+    "tooltip": "点击打开蛛网中心；有待确认会话时将直接跳转",
+    "working": "巡逻 · {n}",
+    "attention": "待确认 · {n}",
+    "low_quota": "余量 {pct}%"
+  },
+  "composer": {
+    "tagline": "好邻居 · 快捷指令",
+    "tooltip": "展开 / 收起常用 Prompt 快捷填词条",
+    "inserted": "已填入输入框",
+    "manage": "管理蛛网",
+    "manage_hint": "已切换到「快捷指令」分页，请从左侧边栏点击「蛛网中心」查看"
+  },
+  "sidebar": {
+    "header": "蛛网会话",
+    "footer": "好邻居巡逻中",
+    "footer_working": "巡逻中 · {n} 任务",
+    "tooltip": "点小蜘蛛触发一句蜘蛛侠台词",
+    "footer_attention": "需处理 · {n}"
+  },
+  "msg": {
+    "save": "存到蛛网",
+    "saved": "已粘到蛛网收藏！"
+  },
+  "hub": {
+    "subtitle": "实时任务感应、蛛网额度仪表盘与本地 SQLite 快捷指令库",
+    "hero_calm": "纽约今夜平静",
+    "hero_alert": "蜘蛛感应：有待处理事项",
+    "hero_working": "正在巡逻 {n} 个会话",
+    "tab_radar": "蜘蛛感应雷达",
+    "tab_web": "蛛网收藏 & 快捷指令",
+    "stat_working": "运行中",
+    "stat_attention": "待确认/审批",
+    "stat_failed": "异常/受限",
+    "stat_quota": "最低活跃余量",
+    "refresh_quota": "刷新额度",
+    "refresh_paced": "额度刷新受冷却限制（每 5 分钟一次）",
+    "section_sessions": "活跃与待处理会话",
+    "no_sessions_title": "纽约今夜很平静",
+    "no_sessions_body": "当前没有正在运行、等待你审批或报错的会话。",
+    "section_quota": "账号额度蛛网雷达",
+    "manage_providers": "监控筛选 ({shown}/{total})",
+    "filter_only_valid": "仅保留有效额度",
+    "filter_show_all": "全部显示",
+    "hide_provider": "隐藏此服务商",
+    "hidden_hint": "已过滤 {n} 个未启用或无额度窗口的服务商，点击上方「监控筛选」可随时恢复显示。",
+    "no_quota_title": "暂无可显示的额度雷达",
+    "no_quota_body": "已隐藏未启用或无窗口的服务商；可点击「监控筛选」勾选要展示的账号。",
+    "no_windows": "该服务商暂未上报额度进度窗口",
+    "quota_expired": "已过期 · 待下次运行刷新",
+    "section_events": "近期蜘蛛感应信号",
+    "no_events": "当前窗口暂未捕获新的后台信号。",
+    "quota_active": "当前使用",
+    "quota_remaining": "剩余 {pct}%",
+    "quota_used": "已用 {pct}%",
+    "quota_resets": "{when}后重置",
+    "win_session": "5小时 / 会话窗口",
+    "win_week": "本周配额窗口",
+    "win_day": "今日配额窗口",
+    "filter_all": "全部",
+    "filter_prompt": "快捷指令",
+    "filter_snippet": "消息收藏",
+    "search_placeholder": "搜索快捷指令或收藏内容…",
+    "composer_heading": "编织新蛛网",
+    "new_title_ph": "标题（例如：性能优化排查）",
+    "new_content_ph": "输入常用的 Prompt 模板或备忘片段…",
+    "save_btn": "保存到蛛网",
+    "clear_btn": "清空",
+    "insert_btn": "填入对话",
+    "edit_btn": "编辑",
+    "save_edit_btn": "保存修改",
+    "cancel_btn": "取消",
+    "promote_btn": "设为快捷指令",
+    "demote_btn": "转回收藏",
+    "expand_btn": "展开全文",
+    "collapse_btn": "收起",
+    "delete_btn": "删除",
+    "empty_web_title": "蛛网还是空的",
+    "empty_web_body": "在上方添加常用 Prompt，或在聊天回复悬停处点击「存到蛛网」。",
+    "kind_prompt": "快捷指令",
+    "kind_snippet": "消息收藏",
+    "status_working": "运行中",
+    "status_attention": "待确认",
+    "status_failed": "异常",
+    "updated_toast": "已更新蛛网条目"
+  },
+  "notify": {
+    "awaiting_title": "蜘蛛感应：需要你确认",
+    "awaiting_body": "「{title}」正在等待你的回复或审批。",
+    "errored_title": "蜘蛛感应：任务异常",
+    "errored_body": "「{title}」执行时遇到错误已停止。",
+    "finished_title": "蜘蛛感应：任务完成",
+    "finished_body": "「{title}」已完成本轮回复。",
+    "quota_title": "蜘蛛感应：额度偏低 ({pct}%)",
+    "quota_body": "{provider} 的 {window} 窗口仅剩 {pct}% 额度。"
+  },
+  "quotes": {
+    "q1": "能力越大，代码责任越大！",
+    "q2": "蜘蛛感应响了——今天也要丝滑写代码！",
+    "q3": "任何人都可以戴上面具，任何人都可以写出好代码。",
+    "q4": "你的好邻居调试助手已就位！"
+  },
+  "pet": {
+    "tooltip": "点击与小蛛交互",
+    "title": "小蛛 · 巡逻伙伴",
+    "close": "关闭",
+    "this_chat": "当前会话",
+    "status_patrol": "正在面板四处漫游中",
+    "status_attention": "⚡ 发现待处理会话：{title}",
+    "status_working": "🔄 {n} 个任务运行中：{title}",
+    "status_current": "💬 正在查看：{title}",
+    "quota_ok": "额度 {pct}%",
+    "quota_none": "额度 —",
+    "btn_jump": "前往会话",
+    "btn_inspect_chat": "巡检提问",
+    "btn_draft_prompt": "快捷指令",
+    "btn_weave": "织张网",
+    "btn_rappel": "垂丝",
+    "btn_roam": "换处逛",
+    "spun_web": "🕸 织好了一张小网~",
+    "rappel_say": "🕷 垂丝下来瞄一眼...",
+    "roam_say": "🕷 溜达去别处看看~",
+    "alert_attention": "⚡「{title}」在等你确认！点我跳转",
+    "visit_chat": "👀 来到「{title}」旁守候",
+    "patrol_working": "🕷 巡逻中：{n} 个任务正在跑",
+    "whisper_1": "🕸 四处巡逻中，一切正常~",
+    "whisper_2": "🕷 能力越大，责任越大！",
+    "whisper_3": "👀 看看你在写什么代码...",
+    "whisper_4": "🕸 点我可以织网或跳到会话哦",
+    "toast_composed": "已向输入框插入进度巡检提问",
+    "toast_prompt": "已插入快捷指令「{title}」",
+    "tooltip_sess": "小蛛 · {title}（点击互动）",
+    "done_prompt": "✓ {title} · 已完成，点击进入",
+    "done_here_prompt": "✓ {title} · 本轮完成，点击起飞",
+    "swing_say": "咻——蛛丝发射！",
+    "status_idle_chat": "守护会话：{title}",
+    "btn_open_chat": "进入会话",
+    "kind_attention": "待确认",
+    "kind_working": "运行中",
+    "kind_current": "当前会话",
+    "kind_patrol": "自由巡逻"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "name": "Spider-Man",
+  "description": "Spider-Verse NYC skyline wallpaper, Spider-Sense task & quota radar, and Web Snippets & Quick Prompts hub.",
+  "settings": {
+    "wallpaper": {
+      "title": "New-chat wallpaper",
+      "description": "Use the Spider-Verse NYC skyline as the new-chat background.",
+      "section": "Wallpaper",
+      "options": {
+        "on": "Spider-Verse Skyline",
+        "off": "Off"
+      }
+    },
+    "parallax": {
+      "title": "3D Parallax depth",
+      "description": "How far the NYC skyline and foreground webs shift with the cursor.",
+      "section": "Motion",
+      "options": {
+        "off": "Off",
+        "subtle": "Subtle",
+        "normal": "Normal",
+        "deep": "Deep"
+      }
+    },
+    "show_badge": {
+      "title": "Spider-Sense radar pill",
+      "description": "Show live task & quota radar badge in the sidebar header.",
+      "section": "Radar"
+    },
+    "notify_events": {
+      "title": "Spider-Sense notifications",
+      "description": "Notify when a background session needs input/approval, errors, or quota drops low.",
+      "section": "Radar"
+    },
+    "quota_warn_pct": {
+      "title": "Quota alert threshold",
+      "description": "Trigger Spider-Sense warning when remaining account quota drops below this percent.",
+      "section": "Radar"
+    },
+    "show_composer_deco": {
+      "title": "Composer web & quick prompts",
+      "description": "Show web filigree and quick-prompt launcher below the message box.",
+      "section": "Productivity"
+    },
+    "show_quick_save": {
+      "title": "Save message to Web button",
+      "description": "Show a quick Save-to-Web button when hovering chat messages.",
+      "section": "Productivity"
+    },
+    "show_sidebar_deco": {
+      "title": "Sidebar spider elements",
+      "description": "Show the Spider-Net divider and dangling spider patrol footer in the left sidebar.",
+      "section": "Interface"
+    }
+  },
+  "page": {
+    "title": "Spider Hub"
+  },
+  "badge": {
+    "label": "Spider-Sense",
+    "tooltip": "Click to open Spider Hub or jump to pending sessions",
+    "working": "Working · {n}",
+    "attention": "Action · {n}",
+    "low_quota": "Quota {pct}%"
+  },
+  "composer": {
+    "tagline": "Friendly Neighborhood · Quick Prompts",
+    "tooltip": "Toggle quick prompts to insert into the message box",
+    "inserted": "Inserted into message box",
+    "manage": "Spider Hub",
+    "manage_hint": "Open Spider Hub from the left sidebar to manage prompts"
+  },
+  "sidebar": {
+    "header": "SPIDER-NET",
+    "footer": "Patrol active",
+    "footer_working": "Patrol · {n} active",
+    "tooltip": "Click for a Spider-Sense tip",
+    "footer_attention": "Attention · {n}"
+  },
+  "msg": {
+    "save": "Save to Web",
+    "saved": "Caught in Spider-Web!"
+  },
+  "hub": {
+    "subtitle": "Live session radar, Spider-Web quota gauges & local SQLite quick prompts",
+    "hero_calm": "NYC Calm Tonight",
+    "hero_alert": "Spider-Sense: Action Needed",
+    "hero_working": "Patrolling {n} active",
+    "tab_radar": "Spider-Sense Radar",
+    "tab_web": "Web Snippets & Prompts",
+    "stat_working": "Running",
+    "stat_attention": "Needs Input",
+    "stat_failed": "Issues",
+    "stat_quota": "Min Active Quota",
+    "refresh_quota": "Refresh Quota",
+    "refresh_paced": "Quota refresh is rate-limited (every 5 min)",
+    "section_sessions": "Active & Pending Sessions",
+    "no_sessions_title": "All Quiet in NYC",
+    "no_sessions_body": "No sessions are currently running, waiting for approval, or errored.",
+    "section_quota": "Spider-Web Quota Radar",
+    "manage_providers": "Providers ({shown}/{total})",
+    "filter_only_valid": "Active Only",
+    "filter_show_all": "Show All",
+    "hide_provider": "Hide provider",
+    "hidden_hint": "{n} disabled or empty providers are hidden. Click Providers above to toggle visibility.",
+    "no_quota_title": "No Visible Quota Gauges",
+    "no_quota_body": "Hidden providers can be restored anytime using the Providers filter above.",
+    "no_windows": "No quota windows reported for this provider yet",
+    "quota_expired": "Expired · refreshes on next run",
+    "section_events": "Recent Spider-Sense Signals",
+    "no_events": "No signals recorded yet in this window.",
+    "quota_active": "Active",
+    "quota_remaining": "{pct}% left",
+    "quota_used": "{pct}% used",
+    "quota_resets": "Resets in {when}",
+    "win_session": "Session Window",
+    "win_week": "Weekly Window",
+    "win_day": "Daily Window",
+    "filter_all": "All",
+    "filter_prompt": "Quick Prompts",
+    "filter_snippet": "Saved Snippets",
+    "search_placeholder": "Search prompts or saved snippets…",
+    "composer_heading": "Weave New Strand",
+    "new_title_ph": "Title (e.g. Perf Check)",
+    "new_content_ph": "Prompt template or reusable note…",
+    "save_btn": "Save to Web",
+    "clear_btn": "Clear",
+    "insert_btn": "Insert",
+    "edit_btn": "Edit",
+    "save_edit_btn": "Save",
+    "cancel_btn": "Cancel",
+    "promote_btn": "Make Prompt",
+    "demote_btn": "Move to Notes",
+    "expand_btn": "Expand",
+    "collapse_btn": "Collapse",
+    "delete_btn": "Delete",
+    "empty_web_title": "Empty Spider-Web",
+    "empty_web_body": "Add a reusable prompt above or click Save to Web on any chat reply.",
+    "kind_prompt": "Prompt",
+    "kind_snippet": "Snippet",
+    "status_working": "Running",
+    "status_attention": "Needs You",
+    "status_failed": "Attention",
+    "updated_toast": "Spider-Web item updated"
+  },
+  "notify": {
+    "awaiting_title": "Spider-Sense: Action Needed",
+    "awaiting_body": "{title} is waiting for your input or approval.",
+    "errored_title": "Spider-Sense: Session Error",
+    "errored_body": "{title} stopped with an error.",
+    "finished_title": "Spider-Sense: Task Finished",
+    "finished_body": "{title} completed its turn.",
+    "quota_title": "Spider-Sense: Low Quota ({pct}%)",
+    "quota_body": "{provider} window {window} has {pct}% remaining."
+  },
+  "quotes": {
+    "q1": "With great code comes great responsibility.",
+    "q2": "Spider-Sense tingling — keep building!",
+    "q3": "Anyone can wear the mask. Anyone can ship.",
+    "q4": "Friendly neighborhood debugger standing by!"
+  },
+  "pet": {
+    "tooltip": "Interact with Spidey Pet",
+    "title": "Spidey · Patrol Buddy",
+    "close": "Close",
+    "this_chat": "Current Chat",
+    "status_patrol": "Roaming the panel",
+    "status_attention": "⚡ Needs attention: {title}",
+    "status_working": "🔄 {n} working: {title}",
+    "status_current": "💬 Watching: {title}",
+    "quota_ok": "Quota {pct}%",
+    "quota_none": "Quota —",
+    "btn_jump": "Open Chat",
+    "btn_inspect_chat": "Check-In",
+    "btn_draft_prompt": "Prompt",
+    "btn_weave": "Spin Web",
+    "btn_rappel": "Rappel",
+    "btn_roam": "Wander",
+    "spun_web": "🕸 Spun a little web!",
+    "rappel_say": "🕷 Dropping down on a silk thread...",
+    "roam_say": "🕷 Scuttling somewhere new!",
+    "alert_attention": "⚡ \"{title}\" is waiting for you! Click to jump",
+    "visit_chat": "👀 Checking in on \"{title}\"",
+    "patrol_working": "🕷 Patrolling: {n} running",
+    "whisper_1": "🕸 Keeping an eye on your workspace~",
+    "whisper_2": "🕷 With great code comes great testing!",
+    "whisper_3": "👀 Just peeking at your session...",
+    "whisper_4": "🕸 Click me to spin a web or jump chats",
+    "toast_composed": "Inserted quick progress check prompt",
+    "toast_prompt": "Inserted quick prompt \"{title}\"",
+    "tooltip_sess": "Spidey · {title} (click to interact)",
+    "done_prompt": "✓ {title} · Done, click to open",
+    "done_here_prompt": "✓ {title} · Turn done, click to swing out",
+    "swing_say": "THWIP! Swinging out!",
+    "status_idle_chat": "Watching chat: {title}",
+    "btn_open_chat": "Open Chat",
+    "kind_attention": "Attention",
+    "kind_working": "Working",
+    "kind_current": "Active",
+    "kind_patrol": "Patrol"
+  }
+}
