@@ -30,15 +30,16 @@
       "db.luau": "2527d063fa9c3973a1a37aaf13285e389ba0d4dc61c2c24d04fd56a08e528a75",
       "hub.luau": "6aa42c459fd46bf0a4a2d24fdc447c58eede558439ad1dc98ed9ea8d553853b8",
       "icon.svg": "334a110205fec17895d620a68b453f1d19f702995495b841d54f89d5ab96ad1c",
-      "init.luau": "4cfb1ceb2075f887eca47a528160c4fba9a534459786c8888b682b6902059952",
+      "init.luau": "a79559671db8068200626fa13d007d1c0d75c7cd5d61ca0e7c2df1701db7dd59",
+      "layout.luau": "820453a20a17dd5882573e2ef2e9a83e966afc42f46c62f64b256d7b7b5bad32",
       "locales/en.json": "10eb5d827a4f96a4a8b220788d2de9907a236a6779515772a53d42942ec7410a",
       "locales/zh-Hans.json": "12b3b51b67256fd7a66bb80d7c79fe5eac4e8d86258f65742ff450b910eaf7eb",
-      "pet.luau": "4c743f3e45b90f77fcd2321bf2590a79e117a0c6456e38d417cad20b8694f4df",
+      "pet.luau": "14f8ecf703a26432d80bd71be7f16737b1ccc296f16ce0b974f31aa1480c3805",
       "radar.luau": "50c28d652de9908d746be30643f9960b3c0a50a680c2dd64336956f4c7bcb326",
       "web_gauge.luau": "748ff27b7155fa1896339b5b460cab66e1b254925a333c01427092c816a6e4df",
       "zeron.luau": "0ef4194bdf34ac0f30315e783972fdc82c05d4269f22d885e15cb59430cb2cd7"
     },
-    "sig": "gONwSK2XHEw6LjFgHqA0YLbIhh4j4KbuWY18tUAdZ8YW7v6w4nwscHNjXlwTz0SjaIABxZfx7rvRZTj2s6FWCQ"
+    "sig": "fVQU0B9LT20PoajcSfViNAqllY4n-zSLvoilPJBo0qswlE6WhTE9WnD9x9qYMygckUQWMASgoAv5S7YgnDBKAw"
   },
   "icon": "icon.svg",
   "ui": {

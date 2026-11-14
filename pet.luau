@@ -8,6 +8,7 @@ local material = require("@ds/material")
 local motion = require("@ds/motion")
 
 local db = require("./db")
+local layout = require("./layout")
 local radar = require("./radar")
 
 local M = {}
@@ -60,7 +61,7 @@ type SpiderSlot = {
 	rappel_dir: number,
 }
 
-local TICK_MS = 60
+local TICK_MS = 20
 local ACTOR_BOX = 72
 local MAX_SPIDERS = 5
 local MAX_WEBS = 3
@@ -399,26 +400,23 @@ function M.register(zeron: any, show_pet: any)
 	zeron.place {
 		at = "#titlebar",
 		after = function(): Node
-			local win_w = ui.use_state(1280)
-			local stage_y = ui.use_state(0)
-			local sidebar_r_shared = ui.state("spider_layout_sidebar_r", 268)
-			local prose_cx_shared = ui.state("spider_layout_prose_cx", 0)
-			local prose_w_shared = ui.state("spider_layout_prose_w", 0)
+			local win_w = layout.win_w
+			local stage_y = layout.stage_y
 
 			local function max_by(reactive: boolean?): number
-				local sy = if reactive then stage_y:get() else stage_y:peek()
-				if sy > 240 then
-					return clamp(math.floor(sy - 48), 320, 1400)
-				end
-				local ww = if reactive then win_w:get() else win_w:peek()
-				return clamp(math.floor(ww * 0.48), 340, 1180)
+				return layout.max_by(reactive)
 			end
 
-			local function compute_zones(W: number, H_up: number, reactive: boolean?): { sidebar_r: number, text_x1: number, text_x2: number }
-				local sr_raw = if reactive then sidebar_r_shared:get() else sidebar_r_shared:peek()
-				local cx_raw = if reactive then prose_cx_shared:get() else prose_cx_shared:peek()
-				local pw_raw = if reactive then prose_w_shared:get() else prose_w_shared:peek()
-				local sr = clamp(tonumber(sr_raw) or 268, 0, W * 0.42)
+			local function compute_zones(W: number, H_up: number, reactive: boolean?): { sidebar_r: number, panel_l: number, right_l: number, text_x1: number, text_x2: number }
+				local sr_raw = tonumber(if reactive then layout.sidebar_r:get() else layout.sidebar_r:peek()) or 0
+				local pl_raw = tonumber(if reactive then layout.panel_l:get() else layout.panel_l:peek()) or 0
+				local cx_raw = tonumber(if reactive then layout.prose_cx:get() else layout.prose_cx:peek()) or 0
+				local pw_raw = tonumber(if reactive then layout.prose_w:get() else layout.prose_w:peek()) or 0
+
+				local sr = clamp(sr_raw, 0, W * 0.42)
+				local panel_l = if pl_raw > (sr + 160) and pl_raw < (W - 40) then pl_raw else 0
+				local right_l = if panel_l > 0 then panel_l else W
+
 				local theme_pw = 720
 				if ui.theme and type((ui.theme :: any).get) == "function" then
 					local ok_pw, raw_pw = pcall(function() return (ui.theme :: any).get("zeron.prose.measure") end)
@@ -426,20 +424,26 @@ function M.register(zeron: any, show_pet: any)
 						theme_pw = tonumber(raw_pw) :: number
 					end
 				end
-				local pw = math.max(tonumber(pw_raw) or 0, theme_pw)
-				local pcx = if (tonumber(cx_raw) or 0) > sr + 80 and (tonumber(cx_raw) or 0) < W - 80
-					then tonumber(cx_raw) :: number
-					else (sr + W) * 0.5
-				local text_x1 = clamp(pcx - pw * 0.5 - 20, sr + 12, W - 120)
-				local text_x2 = clamp(pcx + pw * 0.5 + 20, text_x1 + 100, W - 12)
-				return { sidebar_r = sr, text_x1 = text_x1, text_x2 = text_x2 }
+				local max_pane_w = math.max(120, right_l - sr - 16)
+				local pw = math.min(math.max(pw_raw, theme_pw), max_pane_w)
+
+				local geo_cx = (sr + right_l) * 0.5
+				local pcx = if cx_raw > (sr + 60) and cx_raw < (right_l - 60) and math.abs(cx_raw - geo_cx) <= 44
+					then cx_raw
+					else geo_cx
+
+				local text_x1 = clamp(pcx - pw * 0.5 - 22, sr + 6, right_l - 80)
+				local text_x2 = clamp(pcx + pw * 0.5 + 22, text_x1 + 80, right_l - 6)
+				return { sidebar_r = sr, panel_l = panel_l, right_l = right_l, text_x1 = text_x1, text_x2 = text_x2 }
 			end
 
 			local function is_in_text_zone(x: number, by: number, W: number, H_up: number, reactive: boolean?): boolean
 				local z = compute_zones(W, H_up, reactive)
-				local over_sidebar = z.sidebar_r > 75 and x < (z.sidebar_r - 10) and by > 42 and by < (H_up - 18)
-				local over_prose = x >= z.text_x1 and x <= z.text_x2 and by > 36 and by < (H_up - 30)
-				return over_sidebar or over_prose
+				local over_sidebar = z.sidebar_r > 70 and x < (z.sidebar_r + 14) and by > 20 and by < (H_up - 8)
+				local over_rail = z.sidebar_r > 20 and z.sidebar_r <= 70 and x < (z.sidebar_r + 10) and by > 20 and by < (H_up - 8)
+				local over_prose = x >= z.text_x1 and x <= z.text_x2 and by > 28 and by < (H_up - 16)
+				local over_right_panel = z.panel_l > 0 and x >= (z.panel_l - 14) and by > 20 and by < (H_up - 8)
+				return over_sidebar or over_rail or over_prose or over_right_panel
 			end
 
 			local function pick_target(prefer_edge: boolean?): (number, number)
@@ -447,9 +451,8 @@ function M.register(zeron: any, show_pet: any)
 				local H_up = max_by(false)
 				local z = compute_zones(W, H_up, false)
 				local left_gap = z.text_x1 - z.sidebar_r
-				local right_gap = W - z.text_x2
+				local right_gap = z.right_l - z.text_x2
 
-				-- Build safe non-text corridors & edges first
 				local choices: { number } = {}
 				if left_gap >= 68 then
 					table.insert(choices, 1)
@@ -460,11 +463,11 @@ function M.register(zeron: any, show_pet: any)
 					table.insert(choices, 2)
 					table.insert(choices, 2)
 				end
-				table.insert(choices, 3) -- sidebar vertical seam
-				table.insert(choices, 4) -- top ceiling strip
-				table.insert(choices, 5) -- right window edge
+				table.insert(choices, 3)
+				table.insert(choices, 4)
+				table.insert(choices, 5)
 				if left_gap >= 64 or right_gap >= 64 then
-					table.insert(choices, 6) -- bottom safe margin corner
+					table.insert(choices, 6)
 				end
 
 				if prefer_edge or math.random() < 0.96 then
@@ -475,18 +478,19 @@ function M.register(zeron: any, show_pet: any)
 						return math.random(x1, x2), math.random(68, math.max(120, H_up - 32))
 					elseif spot == 2 then
 						local x1 = math.floor(z.text_x2 + 24)
-						local x2 = math.max(x1 + 8, math.floor(W - 36))
+						local x2 = math.max(x1 + 8, math.floor(z.right_l - 36))
 						return math.random(x1, x2), math.random(68, math.max(120, H_up - 32))
 					elseif spot == 3 then
-						return clamp(math.floor(z.sidebar_r) + math.random(-4, 10), 40, W - 46), math.random(64, math.max(120, H_up - 20))
+						return clamp(math.floor(z.sidebar_r) + math.random(12, 24), 40, z.right_l - 46), math.random(64, math.max(120, H_up - 20))
 					elseif spot == 4 then
 						return math.random(44, math.max(120, math.floor(W - 56))), H_up - math.random(4, 22)
 					elseif spot == 5 then
-						return math.floor(W - 44) + math.random(0, 14), math.random(64, math.max(120, H_up - 24))
+						local edge_x = if z.panel_l > 0 then math.floor(z.right_l - 24) else math.floor(W - 38)
+						return clamp(edge_x + math.random(-8, 8), 44, W - 28), math.random(64, math.max(120, H_up - 24))
 					else
 						if right_gap >= 64 and (left_gap < 64 or math.random() < 0.6) then
 							local x1 = math.floor(z.text_x2 + 24)
-							return math.random(x1, math.max(x1 + 8, math.floor(W - 36))), math.random(46, 72)
+							return math.random(x1, math.max(x1 + 8, math.floor(z.right_l - 36))), math.random(46, 72)
 						else
 							local x1 = math.floor(z.sidebar_r + 22)
 							return math.random(x1, math.max(x1 + 8, math.floor(z.text_x1 - 22))), math.random(46, 72)
@@ -600,10 +604,12 @@ function M.register(zeron: any, show_pet: any)
 			local function start_weave(slot: SpiderSlot)
 				local now_s = ui.now() / 1000
 				local p = slot.pose:peek()
-				slot.tx = p.x
-				slot.tby = p.by
+				local r = 10
+				local start_ang = p.hd - math.pi / 2
+				slot.tx = p.x - math.cos(start_ang) * r
+				slot.tby = p.by + math.sin(start_ang) * r
 				slot.phase:set("weave")
-				slot.weave_angle = 0
+				slot.weave_angle = start_ang
 				slot.mode_until = now_s + 2.2
 				spawn_web(p.x, p.by)
 				say_slot(slot, zeron.s("pet.spun_web"), 3.2)
@@ -873,16 +879,41 @@ function M.register(zeron: any, show_pet: any)
 				if show_pet:get() ~= true then
 					return
 				end
-				ui.every(TICK_MS, function()
+				local last_tick_ms = ui.now()
+				local last_layout_ms = 0
+				local cached_W = math.max(360, tonumber(win_w:peek()) or 1280)
+				local cached_H_up = max_by(false)
+				return ui.every(TICK_MS, function()
+					local now_ms = ui.now()
+					local dt = clamp((now_ms - last_tick_ms) / 1000, 0.004, 0.05)
+					last_tick_ms = now_ms
+
 					local win = zeron.window(true)
 					if not win.shown or motion.reduced() then
 						return
 					end
 
-					local now_s = ui.now() / 1000
-					local dt = TICK_MS / 1000
-					local W = math.max(360, win_w:peek())
-					local H_up = max_by(false)
+					local now_s = now_ms / 1000
+					local layout_shifted = false
+					if (now_ms - last_layout_ms) >= 60 then
+						last_layout_ms = now_ms
+						cached_W, cached_H_up, layout_shifted = layout.sample()
+					end
+					local W, H_up = cached_W, cached_H_up
+
+					if layout_shifted then
+						for _, sl in slots do
+							if sl.active:peek() then
+								local ph_now = sl.phase:peek()
+								if (ph_now == "walk" or ph_now == "peek") and is_in_text_zone(sl.tx, sl.tby, W, H_up, false) then
+									local nx, nby = pick_target(true)
+									sl.tx = nx
+									sl.tby = nby
+									sl.phase:set("walk")
+								end
+							end
+						end
+					end
 
 					if has_webs then
 						local any_alive = false
@@ -913,7 +944,7 @@ function M.register(zeron: any, show_pet: any)
 
 							local p = clone_pose(sl.pose:peek())
 							if p.hop > 0.1 then
-								p.hop = p.hop * 0.78
+								p.hop = p.hop * math.exp(-dt * 4.14)
 							else
 								p.hop = 0
 							end
@@ -978,12 +1009,14 @@ function M.register(zeron: any, show_pet: any)
 									if is_in_text_zone(p.x, p.by, W, H_up, false) then
 										speed = speed * 1.45
 									end
-									local step = math.min(dist, speed * dt)
+									local target_a = math.atan2(dy_screen, dx)
+									local ang_diff = norm_angle(target_a - p.hd)
+									p.hd = p.hd + ang_diff * math.min(1, dt * 11.0)
+									local align = clamp((math.cos(ang_diff) + 0.15) / 1.15, 0.12, 1.0)
+									local step = math.min(dist, speed * align * dt)
 									p.x = clamp(p.x + (dx / dist) * step, 28, W - 36)
 									p.by = clamp(p.by + (dby / dist) * step, 44, H_up)
-									local target_a = math.atan2(dy_screen, dx)
-									p.hd = p.hd + norm_angle(target_a - p.hd) * 0.22
-									p.wp += dt * 18
+									p.wp += dt * (11.0 + 7.0 * align)
 									sl.pose:set(p)
 								end
 							elseif ph == "peek" then
@@ -1091,6 +1124,7 @@ function M.register(zeron: any, show_pet: any)
 			-- Build direct children table using table.insert (NEVER mid-table table.unpack!)
 			-- and use reactive hidden= on each absolute element (zero nested 0x0 wrapper clipping).
 			local layer_children: { [any]: any } = {
+				ref = layout.ref("titlebar"),
 				id = "spider-pet-layer",
 				w_full = true,
 				h = 0,
@@ -1250,11 +1284,13 @@ function M.register(zeron: any, show_pet: any)
 					hidden = function(): boolean
 						return not (slot_visible() and sl.phase:get() == "completed")
 					end,
-					left = function(): number
+					left = 0,
+					top = 0,
+					x = function(): number
 						local W = math.max(360, win_w:get())
 						return clamp(sl.pose:get().x - 92, 12, W - 224)
 					end,
-					top = function(): number
+					y = function(): number
 						local by_now = sl.pose:get().by
 						return if by_now < max_by(true) - 80 then -by_now - 56 else -by_now + 32
 					end,
@@ -1301,11 +1337,13 @@ function M.register(zeron: any, show_pet: any)
 					hidden = function(): boolean
 						return not (slot_visible() and sl.phase:get() ~= "completed" and sl.whisper:get() ~= nil and menu_slot_idx:get() ~= sl.idx)
 					end,
-					left = function(): number
+					left = 0,
+					top = 0,
+					x = function(): number
 						local W = math.max(360, win_w:get())
 						return clamp(sl.pose:get().x - 72, 12, W - 196)
 					end,
-					top = function(): number
+					y = function(): number
 						local by_now = sl.pose:get().by
 						return if by_now < max_by(true) - 80 then -by_now - 50 else -by_now + 30
 					end,
@@ -1361,11 +1399,13 @@ function M.register(zeron: any, show_pet: any)
 					hidden = function(): boolean
 						return not slot_visible()
 					end,
-					left = function(): number
-						return sl.pose:get().x - ACTOR_BOX / 2
+					left = -ACTOR_BOX / 2,
+					top = -ACTOR_BOX / 2,
+					x = function(): number
+						return sl.pose:get().x
 					end,
-					top = function(): number
-						return -sl.pose:get().by - ACTOR_BOX / 2
+					y = function(): number
+						return -sl.pose:get().by
 					end,
 					w = ACTOR_BOX,
 					h = ACTOR_BOX,

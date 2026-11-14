@@ -10,6 +10,7 @@ local db = require("./db")
 local radar = require("./radar")
 local hub = require("./hub")
 local pet = require("./pet")
+local layout = require("./layout")
 
 local parallax = zeron.setting("parallax")
 local show_badge = zeron.setting("show_badge")
@@ -277,7 +278,10 @@ zeron.place {
 			end)
 		end
 
-		return ui.presence(function(): string
+		return ui.div {
+			ref = layout.ref("composer_toolbar"),
+			w_full = true,
+			ui.presence(function(): string
 			if show_composer_deco:get() ~= true then
 				return ""
 			end
@@ -322,35 +326,8 @@ zeron.place {
 				build_header(),
 				build_drawer(),
 			}
-		end, {
-			w_full = true,
-			on_resize = function(sz: { w: number, h: number }, el: any)
-				local cx_s = ui.state("spider_layout_prose_cx", 0)
-				local pw_s = ui.state("spider_layout_prose_w", 0)
-				local cy_s = ui.state("spider_layout_composer_y", 0)
-				if el and type(el.x) == "number" and type(el.width) == "number" and el.width > 120 then
-					local ncx = math.floor(el.x + el.width * 0.5)
-					local npw = math.floor(el.width)
-					if math.abs((tonumber(cx_s:peek()) or 0) - ncx) > 2 then
-						cx_s:set(ncx)
-					end
-					if math.abs((tonumber(pw_s:peek()) or 0) - npw) > 2 then
-						pw_s:set(npw)
-					end
-				elseif sz.w > 120 then
-					local npw = math.floor(sz.w)
-					if math.abs((tonumber(pw_s:peek()) or 0) - npw) > 2 then
-						pw_s:set(npw)
-					end
-				end
-				if el and type(el.y) == "number" and el.y > 100 then
-					local ncy = math.floor(el.y)
-					if math.abs((tonumber(cy_s:peek()) or 0) - ncy) > 2 then
-						cy_s:set(ncy)
-					end
-				end
-			end,
-		})
+		end, { w_full = true })
+		}
 	end,
 }
 
@@ -360,19 +337,9 @@ zeron.place {
 	after = function(): Node
 		local quote_idx = ui.use_state(0)
 		return ui.div {
+			ref = layout.ref("sidebar"),
 			w_full = true,
 			shrink = 0,
-			on_resize = function(sz: { w: number, h: number }, el: any)
-				local right_x = if el and type(el.x) == "number" and type(el.width) == "number"
-					then math.floor(el.x + el.width)
-					else math.floor(sz.w)
-				if right_x > 10 then
-					local sr_s = ui.state("spider_layout_sidebar_r", 268)
-					if math.abs((tonumber(sr_s:peek()) or 268) - right_x) > 2 then
-						sr_s:set(right_x)
-					end
-				end
-			end,
 			ui.show(function(): boolean
 				return show_sidebar_deco:get() == true or show_badge:get() == true
 			end, ui.column {
@@ -474,6 +441,50 @@ zeron.place {
 			},
 		}),
 		}
+	end,
+}
+
+
+-- 3b. Live ref-based layout probes (zero visual footprint, tracked every frame by layout.sample)
+zeron.place {
+	at = "#rail",
+	after = function(): Node
+		return layout.probe("rail")
+	end,
+}
+
+zeron.place {
+	at = "#chat-session",
+	after = function(): Node
+		return layout.probe("chat_session")
+	end,
+}
+
+zeron.place {
+	at = "#chat-home",
+	after = function(): Node
+		return layout.probe("chat_home")
+	end,
+}
+
+zeron.place {
+	at = "#session-header",
+	after = function(): Node
+		return layout.probe("session_header")
+	end,
+}
+
+zeron.place {
+	at = "#files-pane",
+	after = function(): Node
+		return layout.probe("files_pane")
+	end,
+}
+
+zeron.place {
+	at = "#panel",
+	after = function(): Node
+		return layout.probe("panel")
 	end,
 }
 
