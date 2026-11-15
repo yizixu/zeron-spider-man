@@ -10,7 +10,7 @@
 
 **纵横宇宙暗夜美学 · 「蜘蛛感应」任务与额度雷达 · 智能避让桌面蜘蛛伙伴 · 本地蛛网提示词库**
 
-[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.1.1-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
+[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.4.0-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
 [![Luau](https://img.shields.io/badge/技术栈-Luau-0ea5e9?style=for-the-badge&logo=lua&logoColor=white)](https://luau.org/)
 [![i18n](https://img.shields.io/badge/多语言-EN%20%7C%20%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-10b981?style=for-the-badge)](#-多语言文档)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-f59e0b?style=for-the-badge)](./LICENSE)
@@ -63,7 +63,7 @@
       <p>把好用的 Prompt 模板与高价值 AI 回复随手“粘”进本地蛛网库。</p>
       <ul>
         <li>📌 <b>消息一键「存到蛛网」</b> — 鼠标悬停任意对话气泡即可收藏至本地 SQLite 数据库。</li>
-        <li>⚡ <b>输入框快捷指令条</b> — 在输入框下方一键切换并填入常用提示词模板。</li>
+        <li>⚡ <b>输入框快捷指令</b> — 点击打开可搜索的下拉列表，点选追加到当前草稿，右侧快捷编辑或确认删除，底部直接新建；支持全部指令。</li>
         <li>🔌 <b>开放扩展插槽</b> — 暴露 <code>stage</code>、<code>pet_actions</code>、<code>hub_actions</code>，方便生态扩展插件接入联动。</li>
       </ul>
     </td>
@@ -89,7 +89,7 @@
 ## 🚀 安装方式
 
 ### 方式一：下载 `.zeron-plugin` 一键安装（推荐）
-1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.1.1.zeron-plugin`。
+1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.4.0.zeron-plugin`。
 2. 在 **Zeron** 中打开 **设置 → 插件 → 从文件安装**（或直接拖入 / 调用 `install_plugin`）。
 3. 启用 **蜘蛛侠（Spider-Man）**，并可在插件设置中一键启用新对话壁纸与各类开关。
 
@@ -188,4 +188,4 @@ Made with 🕸️ for **Zeron** · MIT License © 2026 [yizixu](https://github.c
 
 在输入框下方蛛网快捷栏点击「随手记」，不离开当前对话就能捕捉灵感；草稿自动保留，Ctrl+Enter 保存。笔记关联当前会话和项目，消息操作中的「记下这条」还能保存整条消息及来源。
 
-点击输入框下方快捷栏的「随手记」即可搜索已保存笔记，并一步填入当前草稿；在列表底部选择「新建笔记」可直接记录新想法。「蛛网中心 → 随手记」用于搜索、编辑、删除和查看来源。笔记保存在本机插件 SQLite 数据库中，独立于 Prompt 与消息收藏。
+点击输入框下方快捷栏的「随手记」即可搜索已保存笔记，并一步填入当前草稿；点击笔记右侧的删除按钮，确认后即可删除；在列表底部选择「新建笔记」可直接记录新想法。「蛛网中心 → 随手记」用于搜索、编辑、删除和查看来源。笔记保存在本机插件 SQLite 数据库中，独立于 Prompt 与消息收藏。

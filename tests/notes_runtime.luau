@@ -3,6 +3,14 @@ local function loadStore(ui)
 -- INJECT notes_store
 end
 
+local function loadDb(ui)
+-- INJECT db
+end
+
+local function loadPrompts(ui, require)
+-- INJECT prompts
+end
+
 local function loadToolbar(require)
 -- INJECT toolbar_button
 end
@@ -88,7 +96,9 @@ local function host()
 		take("query").resolve({})
 	end
 	local Store = loadStore(ui)
+	local Db = loadDb(ui)
 	local function imports(name)
+		if name == "./db" then return Db end
 		if name == "./notes_store" then return Store end
 		if name == "./toolbar_button" then return loadToolbar(imports) end
 		if name == "@ds/dialog" then
@@ -117,9 +127,10 @@ local function host()
 		error(`unexpected import: {name}`)
 	end
 	return {
-		ui = ui, zeron = zeron, Store = Store, Notes = loadNotes(ui, imports),
+		ui = ui, zeron = zeron, Store = Store, Notes = loadNotes(ui, imports), Db = Db, Prompts = loadPrompts(ui, imports),
 		states = states, placements = placements, current = current,
 		composed = composed, compose_options = compose_options, toasts = toasts, opened = opened, kept = kept,
+		requests = requests,
 		take = take, ready = ready,
 		drainReads = function(rows)
 			while requests[1] and requests[1].kind == "query" do
@@ -293,4 +304,221 @@ do
 	print("PASS target session guard")
 end
 
-print("PASS 6 runtime scenarios")
+-- Both delete entry points require confirmation, survive failures and refresh
+-- the picker/count only after the persisted delete succeeds.
+for _, entry in { "toolbar", "hub" } do
+	local h = host()
+	local notes = h.Notes.new(h.zeron)
+	h.take("exec").resolve({ changes = 0 })
+	h.take("query").resolve({ row(21, "delete this"), row(22, "keep this") })
+	local view, button
+	if entry == "toolbar" then
+		view = notes.toolbar(h.zeron.live("session"), h.zeron.live("route"))
+		local picker = find(view, "dropdown")
+		button = picker.props.trailing_item(picker.props.items()[1])
+	else
+		view = notes.build()
+		h.drainReads({ row(21, "delete this"), row(22, "keep this") })
+		button = find(view, "button", "notes.delete")
+	end
+	local dialog = find(view, "dialog", "notes.delete_title")
+	button.on_click()
+	same(dialog.open:peek(), true, "opens delete confirmation")
+	same(#h.requests, 0, "opening confirmation does not delete")
+	same(#h.composed, 0, "delete action does not insert note")
+	dialog.open:set(false)
+	same(notes.count(), 2, "cancel keeps notes")
+	button.on_click()
+	dialog.confirm.on_click()
+	local removal = h.take("exec")
+	same(removal.params[1], 21, "delete targets chosen note")
+	dialog.confirm.on_click()
+	same(#h.requests, 0, "duplicate confirmation is ignored")
+	removal.reject("offline")
+	same(notes.count(), 2, "failed delete keeps notes")
+	same(dialog.open:peek(), true, "failure leaves confirmation open for retry")
+	same(h.toasts[#h.toasts], "notes.delete_failed", "failure is reported")
+	same(button.disabled(), false, "failure releases delete guard")
+	dialog.confirm.on_click()
+	h.take("exec").resolve({ changes = 1 })
+	h.take("query").resolve({ row(22, "keep this") })
+	same(dialog.open:peek(), false, "success closes confirmation")
+	same(notes.count(), 1, "successful delete refreshes count")
+	same(h.toasts[#h.toasts], "notes.deleted", "success is reported")
+	local toolbar = notes.toolbar(h.zeron.live("session"), h.zeron.live("route"))
+	local picker = find(toolbar, "dropdown")
+	same(#picker.props.items(), 1, "picker refreshes after delete")
+	same(picker.props.items()[1].value, "22", "other notes remain")
+	picker.props.on_choose("21")
+	same(#h.composed, 0, "deleted note cannot be inserted")
+	print(`PASS {entry} deletion confirmation and retry`)
+end
+
+-- Deleting an edited note blocks saving during the write and preserves text
+-- typed while the delete is in flight as a fresh draft.
+do
+	local h = host()
+	local notes = h.Notes.new(h.zeron)
+	h.take("exec").resolve({ changes = 0 })
+	h.take("query").resolve({ row(21, "saved text") })
+	h.states.spider_notes_draft_id:set(21)
+	h.states.spider_notes_draft_body:set("current edit")
+	local toolbar = notes.toolbar(h.zeron.live("session"), h.zeron.live("route"))
+	local picker = find(toolbar, "dropdown")
+	picker.props.trailing_item(picker.props.items()[1]).on_click()
+	local dialog = find(toolbar, "dialog", "notes.delete_title")
+	dialog.confirm.on_click()
+	local removal = h.take("exec")
+	local area = find(toolbar, "textarea")
+	area.value:set("newer unsaved text")
+	area.on_submit()
+	same(#h.requests, 0, "save blocked during delete")
+	removal.resolve({ changes = 1 })
+	h.take("query").resolve({})
+	same(notes.count(), 0, "last note removed")
+	same(#picker.props.items(), 0, "picker has no stale last item")
+	same(area.value:peek(), "newer unsaved text", "new edits preserved")
+	same(h.states.spider_notes_draft_id:peek(), 0, "new edits become fresh draft")
+	print("PASS delete draft concurrency")
+end
+
+local function prompt_host()
+	local h = host()
+	h.zeron.store("spider_seeded_v1", true)
+	h.Db.init(h.zeron)
+	h.take("exec").resolve({ changes = 0 })
+	local rows = {}
+	for id = 1, 12 do
+		table.insert(rows, { id = id, kind = "prompt", title = `Prompt {id}`, content = `Body {id}`, created_at = 1 })
+	end
+	table.insert(rows, { id = 99, kind = "snippet", title = "Saved message", content = "not a prompt", created_at = 1 })
+	h.take("query").resolve(rows)
+	local view = h.Prompts.toolbar(h.zeron, h.zeron.live("session"))
+	return h, view, find(view, "dropdown"), rows
+end
+
+do
+	local h, view, picker = prompt_host()
+	same(#picker.props.items(), 12, "all prompts listed beyond former eight-item limit")
+	picker.props.on_choose("12")
+	same(h.composed[1], "Body 12", "prompt body inserted")
+	same(h.compose_options[1].session, "source", "current session targeted")
+	same(h.compose_options[1].replace, false, "existing draft preserved")
+	h.current.session = nil
+	picker.props.on_choose("1")
+	same(h.compose_options[2].session, "", "home draft targeted")
+	picker.props.on_choose("99")
+	same(#h.composed, 2, "saved messages excluded")
+	print("PASS prompt picker")
+end
+
+do
+	local h, view, picker, rows = prompt_host()
+	picker.props.actions[1].on_click()
+	local editor = find(view, "dialog", "prompts.new")
+	local title, area = find(editor, "textfield"), find(editor, "textarea")
+	same(editor.open:peek(), true, "new prompt opens editor")
+	area.on_submit()
+	same(#h.requests, 0, "empty prompt rejected")
+	title.value:set("New title")
+	area.value:set("New content")
+	find(editor, "button", "notes.close").on_click()
+	picker.props.actions[1].on_click()
+	same(area.value:peek(), "New content", "closing preserves draft")
+	area.on_submit()
+	local write = h.take("exec")
+	same(write.params[1], "prompt", "new entry is a prompt")
+	area.on_submit()
+	same(#h.requests, 0, "duplicate saves ignored")
+	write.reject("offline")
+	same(editor.open:peek(), true, "failed save keeps editor open")
+	same(area.value:peek(), "New content", "failed save preserves content")
+	area.on_submit()
+	h.take("exec").resolve({ changes = 1 })
+	table.insert(rows, { id = 13, kind = "prompt", title = "New title", content = "New content", created_at = 1 })
+	h.take("query").resolve(rows)
+	same(editor.open:peek(), false, "saved prompt closes editor")
+	same(#picker.props.items(), 13, "saved prompt refreshes picker")
+	same(area.value:peek(), "", "saved draft cleared")
+	print("PASS prompt creation and retry")
+end
+
+do
+	local h, view, picker, rows = prompt_host()
+	local button = find(picker.props.trailing_item(picker.props.items()[1]), "button", "hub.delete_btn")
+	local dialog = find(view, "dialog", "prompts.delete_title")
+	button.on_click()
+	same(dialog.open:peek(), true, "prompt deletion requires confirmation")
+	same(#h.requests, 0, "opening confirmation does not delete")
+	same(#h.composed, 0, "delete does not insert")
+	dialog.open:set(false)
+	same(#picker.props.items(), 12, "cancel keeps prompts")
+	button.on_click()
+	dialog.confirm.on_click()
+	local removal = h.take("exec")
+	same(removal.params[1], 1, "correct prompt deleted")
+	dialog.confirm.on_click()
+	same(#h.requests, 0, "duplicate deletes ignored")
+	removal.reject("offline")
+	same(dialog.open:peek(), true, "failed delete can retry")
+	same(button.disabled(), false, "failed delete releases busy state")
+	dialog.confirm.on_click()
+	h.take("exec").resolve({ changes = 1 })
+	table.remove(rows, 1)
+	h.take("query").resolve(rows)
+	same(#picker.props.items(), 11, "deleted prompt removed from picker")
+	same(dialog.open:peek(), false, "successful delete closes confirmation")
+	picker.props.on_choose("1")
+	same(#h.composed, 0, "deleted prompt cannot insert")
+	print("PASS prompt deletion and retry")
+end
+
+do
+	local h, view, picker, rows = prompt_host()
+	local creation = find(view, "dialog", "prompts.new")
+	find(creation, "textfield").value:set("unsaved new prompt")
+	find(creation, "textarea").value:set("unsaved new content")
+	local controls = picker.props.trailing_item(picker.props.items()[2])
+	local edit = find(controls, "button", "hub.edit_btn")
+	local remove = find(controls, "button", "hub.delete_btn")
+	edit.on_click()
+	local editor = find(view, "dialog", "prompts.edit")
+	local title, area = find(editor, "textfield"), find(editor, "textarea")
+	same(editor.open:peek(), true, "edit opens dialog")
+	same(title.value:peek(), "Prompt 2", "edit prefills title")
+	same(area.value:peek(), "Body 2", "edit prefills content")
+	same(#h.composed, 0, "edit does not insert")
+	find(editor, "button", "hub.cancel_btn").on_click()
+	same(#h.requests, 0, "cancel does not write")
+	edit.on_click()
+	area.value:set(" ")
+	area.on_submit()
+	same(#h.requests, 0, "blank edit rejected")
+	title.value:set("Updated title")
+	area.value:set("Updated body")
+	area.on_submit()
+	local write = h.take("exec")
+	assert(string.find(write.sql, "UPDATE spider_snippets", 1, true), "edit updates existing row")
+	same(write.params[3], 2, "edit targets selected id")
+	same(remove.disabled(), true, "delete blocked while saving edit")
+	area.on_submit()
+	same(#h.requests, 0, "duplicate edit save ignored")
+	write.reject("offline")
+	same(editor.open:peek(), true, "failed edit remains open")
+	same(area.value:peek(), "Updated body", "failed edit keeps text")
+	same(edit.disabled(), false, "failed edit releases busy state")
+	area.on_submit()
+	h.take("exec").resolve({ changes = 1 })
+	rows[2].title, rows[2].content = "Updated title", "Updated body"
+	h.take("query").resolve(rows)
+	same(editor.open:peek(), false, "successful edit closes dialog")
+	same(#picker.props.items(), 12, "editing never adds duplicate prompt")
+	same(picker.props.items()[2].label, "Updated title", "picker updates title")
+	picker.props.on_choose("2")
+	same(h.composed[1], "Updated body", "picker inserts updated content")
+	same(find(creation, "textfield").value:peek(), "unsaved new prompt", "edit preserves separate new draft")
+	same(find(creation, "textarea").value:peek(), "unsaved new content", "edit preserves new draft content")
+	print("PASS quick prompt editing and retry")
+end
+
+print("PASS 14 runtime scenarios")

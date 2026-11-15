@@ -58,10 +58,22 @@
   },
   "composer": {
     "tagline": "Quick Prompts",
-    "tooltip": "Toggle quick prompts to insert into the message box",
-    "inserted": "Inserted into message box",
-    "manage": "Spider Hub",
-    "manage_hint": "Open Spider Hub from the left sidebar to manage prompts"
+    "inserted": "Inserted into message box"
+  },
+  "prompts": {
+    "edit": "Edit prompt",
+    "search": "Search prompt titles",
+    "new": "New prompt",
+    "title": "Title",
+    "content": "Prompt content",
+    "required": "Enter a title and prompt content.",
+    "saved": "Prompt saved",
+    "empty": "No quick prompts yet",
+    "no_results": "No matching prompts",
+    "new_hint": "Choose New prompt below to add one.",
+    "delete_title": "Delete this prompt?",
+    "delete_body": "This cannot be undone. Text already inserted into a draft will remain.",
+    "deleted": "Prompt deleted"
   },
   "sidebar": {
     "header": "SPIDER-NET",
@@ -241,6 +253,7 @@
     "origin": "View source",
     "edit": "Edit",
     "delete": "Delete",
+    "deleted": "Note deleted",
     "expand": "Expand",
     "collapse": "Collapse",
     "cancel": "Cancel",

@@ -1,7 +1,7 @@
 --!strict
 local zeron = require("./zeron")("spider-man")
 local Button = require("@ds/button")
-local ToolbarButton = require("./toolbar_button")
+local Prompts = require("./prompts")
 local Icon = require("@ds/icon")
 local material = require("@ds/material")
 local motion = require("@ds/motion")
@@ -129,14 +129,13 @@ zeron.place {
 	end,
 }
 
--- 2. Composer bottom web ornament + toggleable 1-click Quick Prompt drawer
+-- 2. Composer bottom web ornament + searchable quick actions
 -- On new chat ("home"), Zeron draws a fixed-height .composer-tray behind the footer
 -- that tucks 40px up behind the 26px pill corners. Using a zero-height anchor here
 -- keeps body height untouched so the tray stays seamless, while floating our pill below.
 zeron.place {
 	at = "#composer-toolbar",
 	after = function(): Node
-		local prompts_open = ui.use_state(false)
 		local route_live = zeron.live("route")
 		local session_live = zeron.live("session")
 
@@ -169,23 +168,7 @@ zeron.place {
 						shrink = 0,
 					},
 				},
-				ToolbarButton {
-					lit = function(): boolean
-						return prompts_open:get()
-					end,
-					label = zeron.t("composer.tooltip"),
-					on_click = function()
-						prompts_open:set(not prompts_open:peek())
-					end,
-					Icon { name = "fast-tier", size = 13 },
-					ui.text {
-						function(): string
-							local n = #db.prompts()
-							return `{zeron.s("composer.tagline")} ({n})`
-						end,
-						literal = true,
-					},
-				},
+				Prompts.toolbar(zeron, session_live),
 				ui.div { w = 1, h = 10, bg = "$border", shrink = 0 },
 				notes.toolbar(session_live, route_live),
 				ui.row {
@@ -210,64 +193,6 @@ zeron.place {
 					themed_web_image("art/web-right.webp", "art/web-right-light.webp", 76, 20),
 				},
 			}
-		end
-
-		local function build_drawer(): Node
-			return ui.presence(function(): string
-				if not prompts_open:get() then
-					return ""
-				end
-				return `open:{#db.prompts()}:{db.rev()}`
-			end, function(key: string): Node
-				if key == "" then
-					return ui.div { h = 0 }
-				end
-				local list = db.prompts()
-				local chips: { Node } = {}
-				for i = 1, math.min(#list, 8) do
-					local item = list[i]
-					table.insert(
-						chips,
-						Button {
-							tone = "secondary",
-							size = "xs",
-							shape = "pill",
-							on_click = function()
-								zeron.compose(item.content)
-								zeron.toast(zeron.s("composer.inserted"))
-								prompts_open:set(false)
-							end,
-							ui.text { item.title, literal = true },
-						}
-					)
-				end
-				table.insert(
-					chips,
-					Button {
-						tone = "ghost",
-						size = "xs",
-						shape = "pill",
-						on_click = function()
-							active_tab:set("web")
-							zeron.toast(zeron.s("composer.manage_hint"))
-							prompts_open:set(false)
-						end,
-						Icon { name = "magic-stick", size = 12 },
-						ui.text { zeron.t("composer.manage") },
-					}
-				)
-				return ui.row {
-					w_full = true,
-					flex_wrap = true,
-					mt = "$space.1",
-					px = "$space.2",
-					py = "$space.1",
-					items = "center",
-					justify = "center",
-					gap = "$space.1",
-					table.unpack(chips),
-				}
-			end)
 		end
 
 		return ui.div {
@@ -309,7 +234,6 @@ zeron.place {
 						py = 5,
 						pointer_events = "auto",
 						build_header(),
-						build_drawer(),
 					},
 				}
 			end
@@ -319,7 +243,6 @@ zeron.place {
 				mt = "$space.1",
 				pointer_events = "auto",
 				build_header(),
-				build_drawer(),
 			}
 		end, { w_full = true })
 		}

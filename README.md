@@ -10,7 +10,7 @@
 
 **Spider-Verse Atmosphere · Spider-Sense Session & Quota Radar · Smart Desktop Patrol Pet · Local Web Vault**
 
-[![Zeron Plugin](https://img.shields.io/badge/Zeron-Plugin%20v1.1.1-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
+[![Zeron Plugin](https://img.shields.io/badge/Zeron-Plugin%20v1.4.0-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
 [![Luau](https://img.shields.io/badge/Built%20with-Luau-0ea5e9?style=for-the-badge&logo=lua&logoColor=white)](https://luau.org/)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-10b981?style=for-the-badge)](#-languages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](./LICENSE)
@@ -63,7 +63,7 @@
       <p>Catch great AI replies and reusable prompts directly into your personal Spider-Web.</p>
       <ul>
         <li>📌 <b>One-Click "Save to Web"</b> — Hover any message to archive snippets right into local SQLite.</li>
-        <li>⚡ <b>Composer Quick-Launch Bar</b> — Insert favorite prompt templates directly into the message box with one click.</li>
+        <li>⚡ <b>Composer Quick Prompts</b> — Search all prompts in a dropdown, append one to the current draft, edit or confirm deletion using its right-hand buttons, or create a new prompt from the footer.</li>
         <li>🔌 <b>Open Extension Slots</b> — Exposes <code>stage</code>, <code>pet_actions</code>, and <code>hub_actions</code> for ecosystem add-on plugins.</li>
       </ul>
     </td>
@@ -89,7 +89,7 @@ All visuals shown below are the **actual built-in assets** shipped inside the pl
 ## 🚀 Installation
 
 ### Option A: One-Click `.zeron-plugin` Install (Recommended)
-1. Download `spider-man-1.1.1.zeron-plugin` from the [**Latest Release**](https://github.com/yizixu/zeron-spider-man/releases/latest).
+1. Download `spider-man-1.4.0.zeron-plugin` from the [**Latest Release**](https://github.com/yizixu/zeron-spider-man/releases/latest).
 2. In **Zeron**, go to **Settings → Plugins → Install from file** (or drag-and-drop / use `install_plugin`).
 3. Enable **Spider-Man**, and optionally set the **Spider-Verse Skyline** wallpaper in plugin settings.
 
@@ -188,4 +188,4 @@ Made with 🕸️ for **Zeron** · MIT License © 2026 [yizixu](https://github.c
 
 Click **Quick note** in the web toolbar beneath the composer to capture an idea without leaving the conversation. Drafts are kept automatically; Ctrl+Enter saves. Notes link to the current conversation and project. **Keep as note** on a message captures its text and source.
 
-Click **Quick notes** in the web toolbar to search saved notes and insert one into the current draft in one step. Choose **New note** from the same picker to capture a fresh thought. Use **Spider Hub → Notes** when you need to search, edit, delete, or inspect sources. Notes live in the local plugin SQLite database, separate from saved prompts and snippets.
+Click **Quick notes** in the web toolbar to search saved notes and insert one into the current draft in one step. Click the delete button on the right of a note and confirm to delete it. Choose **New note** from the same picker to capture a fresh thought. Use **Spider Hub → Notes** when you need to search, edit, delete, or inspect sources. Notes live in the local plugin SQLite database, separate from saved prompts and snippets.

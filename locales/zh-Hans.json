@@ -58,10 +58,22 @@
   },
   "composer": {
     "tagline": "快捷指令",
-    "tooltip": "展开 / 收起常用 Prompt 快捷填词条",
-    "inserted": "已填入输入框",
-    "manage": "管理蛛网",
-    "manage_hint": "已切换到「快捷指令」分页，请从左侧边栏点击「蛛网中心」查看"
+    "inserted": "已填入输入框"
+  },
+  "prompts": {
+    "edit": "编辑快捷指令",
+    "search": "搜索快捷指令标题",
+    "new": "新建快捷指令",
+    "title": "标题",
+    "content": "指令内容",
+    "required": "请填写标题和指令内容。",
+    "saved": "快捷指令已保存",
+    "empty": "还没有快捷指令",
+    "no_results": "没有匹配的快捷指令",
+    "new_hint": "点击下方「新建快捷指令」添加。",
+    "delete_title": "删除这条快捷指令？",
+    "delete_body": "无法撤销，已填入输入框的文字不受影响。",
+    "deleted": "快捷指令已删除"
   },
   "sidebar": {
     "header": "蛛网会话",
@@ -241,6 +253,7 @@
     "origin": "回到来源",
     "edit": "编辑",
     "delete": "删除",
+    "deleted": "笔记已删除",
     "expand": "展开",
     "collapse": "收起",
     "cancel": "取消",

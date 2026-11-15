@@ -21,7 +21,7 @@ class NotesRuntimeTests(unittest.TestCase):
         if not executable:
             self.skipTest("Set LUAU_BIN to a Luau CLI executable")
         harness = (ROOT / "tests" / "notes_runtime.luau").read_text(encoding="utf-8")
-        for name in ("notes_store", "toolbar_button", "notes"):
+        for name in ("notes_store", "toolbar_button", "notes", "db", "prompts"):
             source = (ROOT / f"{name}.luau").read_text(encoding="utf-8")
             harness = harness.replace(f"-- INJECT {name}", source)
         with tempfile.TemporaryDirectory(prefix="spider-notes-tests-") as temp:
@@ -35,7 +35,7 @@ class NotesRuntimeTests(unittest.TestCase):
                 timeout=20,
             )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("PASS 6 runtime scenarios", result.stdout)
+        self.assertIn("PASS 14 runtime scenarios", result.stdout)
 
 
 if __name__ == "__main__":

@@ -150,7 +150,7 @@ function M.rev(): number
 	return REV:get()
 end
 
-function M.add(kind: string, title: string, content: string, project: string?, on_done: (() -> ())?)
+function M.add(kind: string, title: string, content: string, project: string?, on_done: (() -> ())?, on_err: ((any) -> ())?)
 	if not zeron_ref or not is_valid_kind(kind) then
 		return
 	end
@@ -170,11 +170,15 @@ function M.add(kind: string, title: string, content: string, project: string?, o
 				on_done()
 			end
 		end, function(err: any)
-			notify_db_error("db.save_failed", err)
+			if on_err then
+				on_err(err)
+			else
+				notify_db_error("db.save_failed", err)
+			end
 		end)
 end
 
-function M.update(id: number, title: string, content: string, on_done: (() -> ())?)
+function M.update(id: number, title: string, content: string, on_done: (() -> ())?, on_err: ((any) -> ())?)
 	if not zeron_ref then
 		return
 	end
@@ -191,7 +195,11 @@ function M.update(id: number, title: string, content: string, on_done: (() -> ()
 				on_done()
 			end
 		end, function(err: any)
-			notify_db_error("db.save_failed", err)
+			if on_err then
+				on_err(err)
+			else
+				notify_db_error("db.save_failed", err)
+			end
 		end)
 end
 

@@ -1069,7 +1069,7 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 								if ph == "peek" or ph == "weave" or ph == "rappel" then
 									sl.mode_until += dt
 								end
-								-- Freeze the whole pose, including swing progress and click bounce.
+								-- Freeze the whole pose, including swing progress and hop offset.
 								continue
 							elseif sl.whisper:peek() ~= nil and now_s > sl.whisper_until then
 								sl.whisper:set(nil)
@@ -1605,9 +1605,7 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 							handle_complete_click(sl)
 							return
 						end
-						local np = clone_pose(sl.pose:peek())
-						np.hop = 8
-						sl.pose:set(np)
+						-- Toggling the menu must preserve the pose frozen by hover.
 						if menu_slot_idx:peek() == sl.idx then
 							menu_slot_idx:set(0)
 						else

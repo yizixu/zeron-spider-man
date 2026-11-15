@@ -24,10 +24,12 @@ function M.new(zeron: any): any
 	local source = ui.state("spider_notes_draft_source", restored.source)
 	local edit_id = ui.state("spider_notes_draft_id", restored.id)
 	local busy = ui.state("spider_notes_busy", false)
+	local deleting = ui.state("spider_notes_deleting", false)
 	local error_text = ui.state("spider_notes_form_error", "")
 	local pending = ui.state("spider_notes_pending", nil :: any)
 	local api = {}
 	busy:set(false)
+	deleting:set(false)
 	store.init()
 	ui.effect(function()
 		kept_draft:set({ body = body:get(), source = source:get(), id = edit_id:get() })
@@ -54,7 +56,7 @@ function M.new(zeron: any): any
 	end
 
 	local function save(on_done: (() -> ())?)
-		if busy:peek() then return end
+		if busy:peek() or deleting:peek() then return end
 		if trim(body:peek()) == "" then
 			error_text:set(zeron.s("notes.required"))
 			return
@@ -77,6 +79,36 @@ function M.new(zeron: any): any
 			if key == "notes.missing" then edit_id:set(0) end
 			error_text:set(zeron.s(key))
 		end)
+	end
+
+	local function delete_dialog(confirm_open: State<boolean>, delete_id: State<number>): Node
+		return Dialog {
+			open = confirm_open, title = zeron.t("notes.delete_title"), body = zeron.t("notes.delete_body"), tone = "danger",
+			confirm = {
+				label = zeron.t("notes.delete"), keep_open = true, busy = function() return deleting:get() end,
+				on_click = function()
+					local id = delete_id:peek()
+					if busy:peek() or deleting:peek() then return end
+					local draft_before = body:peek()
+					deleting:set(true)
+					store.remove(id, function()
+						deleting:set(false)
+						confirm_open:set(false)
+						if edit_id:peek() == id then
+							if body:peek() == draft_before then
+								clear_draft()
+							else
+								edit_id:set(0)
+							end
+						end
+						zeron.toast(zeron.s("notes.deleted"))
+					end, function(key: string)
+						deleting:set(false)
+						zeron.toast(zeron.s(key))
+					end)
+				end,
+			},
+		}
 	end
 
 	local function editor(on_done: (() -> ())?): Node
@@ -119,7 +151,7 @@ function M.new(zeron: any): any
 				} else nil,
 				Button {
 					tone = "accent", size = "sm", shrink = 0, busy = busy,
-					disabled = function() return trim(body:get()) == "" or not store.ready() end,
+					disabled = function() return deleting:get() or trim(body:get()) == "" or not store.ready() end,
 					on_click = function() save(on_done) end,
 					ui.text { zeron.t("notes.save") },
 				},
@@ -142,6 +174,9 @@ function M.new(zeron: any): any
 	function api.toolbar(session_live: () -> any, route_live: () -> any): Node
 		local open = ui.use_state(false)
 		local selected_id = ui.use_state("")
+		local hovered_id = ui.use_state("")
+		local confirm_open = ui.use_state(false)
+		local delete_id = ui.use_state(0)
 		local function open_editor()
 			if trim(body:peek()) == "" and edit_id:peek() == 0 then
 				source:set(source_of(session_live(), nil))
@@ -169,6 +204,32 @@ function M.new(zeron: any): any
 				label = zeron.t("notes.title"),
 				width = 360,
 				placement = { side = "top", align = "end", offset = 6 },
+				on_open = function() hovered_id:set("") end,
+				wrap_item = function(item: any, row: Node): Node
+					return ui.row {
+						w_full = true,
+						on_hover = function(inside: boolean)
+							if inside then
+								hovered_id:set(item.value)
+							elseif hovered_id:peek() == item.value then
+								hovered_id:set("")
+							end
+						end,
+						row,
+					}
+				end,
+				trailing_item = function(item: any): Node
+					return IconButton {
+						invisible = function() return hovered_id:get() ~= item.value end,
+						icon = "trash-bin-minimalistic", size = "sm", tone = "danger",
+						label = zeron.t("notes.delete"),
+						disabled = function() return busy:get() or deleting:get() end,
+						on_click = function()
+							delete_id:set(tonumber(item.value) :: number)
+							confirm_open:set(true)
+						end,
+					}
+				end,
 				actions = {
 					{
 						label = zeron.t("notes.new"),
@@ -238,6 +299,7 @@ function M.new(zeron: any): any
 				cancel = false,
 				build = function() return editor(function() open:set(false) end) end,
 			},
+			delete_dialog(confirm_open, delete_id),
 		}
 	end
 
@@ -272,7 +334,6 @@ function M.new(zeron: any): any
 		local expanded = ui.use_state(0)
 		local confirm_open = ui.use_state(false)
 		local delete_id = ui.use_state(0)
-		local deleting = ui.use_state(false)
 		store.init()
 		return ui.column {
 			w_full = true, gap = "$space.4",
@@ -349,32 +410,7 @@ function M.new(zeron: any): any
 				end
 				return ui.column(cards)
 			end, { w_full = true }),
-			Dialog {
-				open = confirm_open, title = zeron.t("notes.delete_title"), body = zeron.t("notes.delete_body"), tone = "danger",
-				confirm = {
-					label = zeron.t("notes.delete"), keep_open = true, busy = function() return deleting:get() end,
-					on_click = function()
-						local id = delete_id:peek()
-						if busy:peek() then return end
-						local draft_before = body:peek()
-						deleting:set(true)
-						store.remove(id, function()
-							deleting:set(false)
-							confirm_open:set(false)
-							if edit_id:peek() == id then
-								if body:peek() == draft_before then
-									clear_draft()
-								else
-									edit_id:set(0)
-								end
-							end
-						end, function(key: string)
-							deleting:set(false)
-							zeron.toast(zeron.s(key))
-						end)
-					end,
-				},
-			},
+			delete_dialog(confirm_open, delete_id),
 		}
 	end
 	return api

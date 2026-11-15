@@ -9,3 +9,7 @@
 Thumbs.db
 desktop.ini
 *.log
+
+# Python test caches
+__pycache__/
+*.py[cod]
