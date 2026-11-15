@@ -33,8 +33,8 @@
       "section": "感应雷达"
     },
     "show_composer_deco": {
-      "title": "输入框蛛网与快捷指令条",
-      "description": "在对话框下方显示蛛网装饰与一键填词快捷指令栏。",
+      "title": "蛛网快捷栏",
+      "description": "在输入框下方显示快捷指令、随手记与蛛网装饰。",
       "section": "效率工具"
     },
     "show_quick_save": {
@@ -57,7 +57,7 @@
     "title": "蛛网中心"
   },
   "composer": {
-    "tagline": "好邻居 · 快捷指令",
+    "tagline": "快捷指令",
     "tooltip": "展开 / 收起常用 Prompt 快捷填词条",
     "inserted": "已填入输入框",
     "manage": "管理蛛网",
@@ -75,7 +75,7 @@
     "saved": "已粘到蛛网收藏！"
   },
   "hub": {
-    "subtitle": "实时任务感应、蛛网额度仪表盘与本地 SQLite 快捷指令库",
+    "subtitle": "任务、额度、灵感，一网收好。",
     "hero_calm": "纽约今夜平静",
     "hero_alert": "蜘蛛感应：有待处理事项",
     "hero_working": "正在巡逻 {n} 个会话",
@@ -210,5 +210,53 @@
     "p5_content": "请根据当前改动生成 1 条简洁准确的 Conventional Commits 提交信息（附带简短要点说明）。",
     "save_failed": "保存到蛛网失败",
     "delete_failed": "删除蛛网条目失败"
+  },
+  "notes": {
+    "tab": "随手记",
+    "title": "随手记",
+    "quick": "随手记",
+    "new": "新建笔记",
+    "new_hint": "打开编辑器，记下一点想法。",
+    "body_label": "笔记内容",
+    "placeholder": "记下一点想法…",
+    "linked": "来源：{title}",
+    "draft_hint": "草稿自动保留 · Ctrl+Enter 保存",
+    "save": "保存",
+    "saved": "已保存",
+    "required": "写点内容再保存。",
+    "empty": "内容不能为空。",
+    "empty_list": "还没有笔记，记下第一个想法吧。",
+    "search_label": "查找笔记",
+    "search": "搜索笔记或来源",
+    "no_results": "未找到相关笔记",
+    "capture": "记下这条",
+    "captured": "已存入随手记",
+    "carry": "带回对话",
+    "new_chat": "用于新对话",
+    "carry_hint": "点击「插入笔记」继续。",
+    "insert": "插入笔记",
+    "inserted": "已填入输入框",
+    "target_changed": "会话已切换，请重新选择「带回对话」。",
+    "too_long": "内容过长，请精简后插入。",
+    "origin": "回到来源",
+    "edit": "编辑",
+    "delete": "删除",
+    "expand": "展开",
+    "collapse": "收起",
+    "cancel": "取消",
+    "close": "关闭",
+    "finish_draft": "请先保存或清空当前草稿。",
+    "edit_hint": "已载入编辑区",
+    "delete_title": "删除这条笔记？",
+    "delete_body": "无法撤销，来源消息不受影响。",
+    "loading": "加载中…",
+    "retry": "重试",
+    "load_failed": "读取失败，请重试。",
+    "missing": "原笔记已删除，可另存为新笔记。",
+    "save_failed": "保存失败，草稿已保留。",
+    "delete_failed": "删除失败，请重试。",
+    "discard": "清空",
+    "discard_title": "清空草稿？",
+    "discard_body": "未保存的内容将丢失。"
   }
 }

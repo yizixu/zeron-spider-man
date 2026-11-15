@@ -786,6 +786,8 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 				local _rev = sync_rev:get()
 				if show_pet:get() ~= true then
 					menu_slot_idx:set(0)
+					hovered_slot:set(0)
+					hovered_whisper:set(0)
 					for _, sl in slots do
 						sl.active:set(false)
 					end
@@ -916,6 +918,12 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 						if sl.active:peek() then
 							sl.active:set(false)
 							sl.whisper:set(nil)
+							if hovered_slot:peek() == sl.idx then
+								hovered_slot:set(0)
+							end
+							if hovered_whisper:peek() == sl.idx then
+								hovered_whisper:set(0)
+							end
 							if menu_slot_idx:peek() == sl.idx then
 								menu_slot_idx:set(0)
 							end
@@ -1011,9 +1019,17 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 					end
 					local W, H_up = cached_W, cached_H_up
 
+					local open_idx = menu_slot_idx:peek()
+					local hov_idx = hovered_slot:peek()
+					local hov_whisper_idx = hovered_whisper:peek()
+					local function is_slot_hovered(sl: SpiderSlot): boolean
+						return hov_idx == sl.idx
+							or (hov_whisper_idx == sl.idx and sl.whisper:peek() ~= nil and open_idx ~= sl.idx)
+					end
+
 					if layout_shifted then
 						for _, sl in slots do
-							if sl.active:peek() then
+							if sl.active:peek() and not is_slot_hovered(sl) then
 								local ph_now = sl.phase:peek()
 								if (ph_now == "walk" or ph_now == "peek") and is_in_text_zone(sl.tx, sl.tby, W, H_up, false) then
 									local nx, nby = pick_target(true)
@@ -1044,12 +1060,22 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 						end
 					end
 
-					local open_idx = menu_slot_idx:peek()
-
 					for _, sl in slots do
 						if sl.active:peek() then
-							if sl.whisper:peek() ~= nil and now_s > sl.whisper_until then
+							local ph = sl.phase:peek()
+							local is_hovered = is_slot_hovered(sl)
+							if is_hovered then
+								sl.whisper_until += dt
+								if ph == "peek" or ph == "weave" or ph == "rappel" then
+									sl.mode_until += dt
+								end
+								-- Freeze the whole pose, including swing progress and click bounce.
+								continue
+							elseif sl.whisper:peek() ~= nil and now_s > sl.whisper_until then
 								sl.whisper:set(nil)
+								if hov_whisper_idx == sl.idx then
+									hovered_whisper:set(0)
+								end
 							end
 
 							local p = clone_pose(sl.pose:peek())
@@ -1059,7 +1085,6 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 								p.hop = 0
 							end
 
-							local ph = sl.phase:peek()
 							if ph == "swing" then
 								p.st += dt
 								if p.st >= SWING_TOTAL_S then

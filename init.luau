@@ -1,6 +1,7 @@
 --!strict
 local zeron = require("./zeron")("spider-man")
 local Button = require("@ds/button")
+local ToolbarButton = require("./toolbar_button")
 local Icon = require("@ds/icon")
 local material = require("@ds/material")
 local motion = require("@ds/motion")
@@ -8,6 +9,7 @@ local motion = require("@ds/motion")
 local db = require("./db")
 local radar = require("./radar")
 local hub = require("./hub")
+local Notes = require("./notes")
 local pet = require("./pet")
 local layout = require("./layout")
 
@@ -24,7 +26,9 @@ local active_tab = ui.state("spider_hub_tab", "radar")
 layout.reset()
 db.init(zeron)
 radar.init(zeron, notify_events, quota_warn_pct)
-hub.register(zeron, active_tab)
+local notes = Notes.new(zeron)
+notes.register()
+hub.register(zeron, active_tab, notes)
 pet.register(zeron, show_pet, radar.ensure_wired, radar.cleanup)
 
 local STEP_X, STEP_Y = 16, 10
@@ -134,6 +138,7 @@ zeron.place {
 	after = function(): Node
 		local prompts_open = ui.use_state(false)
 		local route_live = zeron.live("route")
+		local session_live = zeron.live("session")
 
 		local function build_header(): Node
 			return ui.row {
@@ -164,46 +169,25 @@ zeron.place {
 						shrink = 0,
 					},
 				},
-				ui.button {
-					shrink = 0,
-					h = 22,
-					items = "center",
-					justify = "center",
-					gap = "$space.1",
-					px = "$space.2",
-					py = 0,
-					rounded = "$radius.full",
-					cursor = "pointer",
-					bg = function(): string
-						return if prompts_open:get() then "$hover" else "#00000000"
+				ToolbarButton {
+					lit = function(): boolean
+						return prompts_open:get()
 					end,
-					color = function(): string
-						return if prompts_open:get() then "$accent" else "$text.tertiary"
-					end,
-					hover = { bg = "$hover", color = "$accent" },
-					active = { bg = "$pressed", color = "$accent" },
 					label = zeron.t("composer.tooltip"),
 					on_click = function()
 						prompts_open:set(not prompts_open:peek())
 					end,
-					ui.image {
-						src = "art/spider-crest.webp",
-						w = 15,
-						h = 15,
-						fit = "contain",
-						shrink = 0,
-						aria_hidden = true,
-					},
+					Icon { name = "fast-tier", size = 13 },
 					ui.text {
 						function(): string
 							local n = #db.prompts()
 							return `{zeron.s("composer.tagline")} ({n})`
 						end,
 						literal = true,
-						font = "$font.mono",
-						text_size = "$font.size.xs",
 					},
 				},
+				ui.div { w = 1, h = 10, bg = "$border", shrink = 0 },
+				notes.toolbar(session_live, route_live),
 				ui.row {
 					grow = 1,
 					min_w = 0,
@@ -291,13 +275,16 @@ zeron.place {
 			w_full = true,
 			ui.presence(function(): string
 			if show_composer_deco:get() ~= true then
-				return ""
+				return if notes.has_pending() then "transfer" else ""
 			end
 			local r = route_live()
 			return if type(r) == "table" and r.name == "home" then "home" else "session"
 		end, function(mode: string): Node
 			if mode == "" then
 				return ui.div { h = 0 }
+			end
+			if mode == "transfer" then
+				return ui.row { justify = "end", h = 22, notes.toolbar(session_live, route_live) }
 			end
 			if mode == "home" then
 				return ui.div {

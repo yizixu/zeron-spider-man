@@ -69,7 +69,8 @@
 --   zeron.on_message(function(message) end)
 --       what arrives: { from = { id, name }, data, at }      ("devices")
 --   zeron.open(route)    "home", { session = id }, { settings = page } ("navigate")
---   zeron.compose(text)  text into the message box, for you to send   ("compose")
+--   zeron.compose(text, { replace?, session? })
+--                        text into a draft, for you to send             ("compose")
 --   zeron.compose_comment { file, line, note, to?, side?, snippet?, key?, session? }
 --                        a review comment chip on a session's draft, sent as
 --                        Zeron's review comments block (file:line, the note,
@@ -1343,8 +1344,16 @@ return function(id: string): any
 		ui.invoke(`{prefix}.open_url`, url)
 	end
 
-	function M.compose(text: string)
-		ui.invoke("zeron.compose.insert", text)
+	function M.compose(text: string, options: { replace: boolean?, session: string? }?)
+		if options == nil then
+			ui.invoke("zeron.compose.insert", text)
+			return
+		end
+		ui.invoke("zeron.compose.insert", {
+			text = text,
+			replace = options.replace == true,
+			session = if options.session ~= nil then options.session else ui.null,
+		})
 	end
 
 	-- A review comment on a file or a diff, as a chip on a session's draft

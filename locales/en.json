@@ -33,8 +33,8 @@
       "section": "Radar"
     },
     "show_composer_deco": {
-      "title": "Composer web & quick prompts",
-      "description": "Show web filigree and quick-prompt launcher below the message box.",
+      "title": "Web toolbar",
+      "description": "Show prompts, quick notes and web accents beneath the composer.",
       "section": "Productivity"
     },
     "show_quick_save": {
@@ -57,7 +57,7 @@
     "title": "Spider Hub"
   },
   "composer": {
-    "tagline": "Friendly Neighborhood · Quick Prompts",
+    "tagline": "Quick Prompts",
     "tooltip": "Toggle quick prompts to insert into the message box",
     "inserted": "Inserted into message box",
     "manage": "Spider Hub",
@@ -75,7 +75,7 @@
     "saved": "Caught in Spider-Web!"
   },
   "hub": {
-    "subtitle": "Live session radar, Spider-Web quota gauges & local SQLite quick prompts",
+    "subtitle": "Tasks, quota and ideas, all in your web.",
     "hero_calm": "NYC Calm Tonight",
     "hero_alert": "Spider-Sense: Action Needed",
     "hero_working": "Patrolling {n} active",
@@ -210,5 +210,53 @@
     "p5_content": "Please write 1 concise and accurate Conventional Commits message based on the current changes (with short bullet notes).",
     "save_failed": "Failed to save item to Spider-Web",
     "delete_failed": "Failed to delete item from Spider-Web"
+  },
+  "notes": {
+    "tab": "Notes",
+    "title": "Quick notes",
+    "quick": "Quick note",
+    "new": "New note",
+    "new_hint": "Start a fresh note from the editor.",
+    "body_label": "Note content",
+    "placeholder": "A thought worth keeping…",
+    "linked": "From: {title}",
+    "draft_hint": "Draft kept · Ctrl+Enter to save",
+    "save": "Save",
+    "saved": "Saved",
+    "required": "Write something first.",
+    "empty": "Content is required.",
+    "empty_list": "No notes yet. Capture your first thought.",
+    "search_label": "Find a note",
+    "search": "Search notes or sources",
+    "no_results": "No matching notes",
+    "capture": "Keep as note",
+    "captured": "Saved to notes",
+    "carry": "Back to chat",
+    "new_chat": "Use in new chat",
+    "carry_hint": "Click “Insert note” to continue.",
+    "insert": "Insert note",
+    "inserted": "Added to the composer",
+    "target_changed": "The conversation changed. Choose “Back to chat” again.",
+    "too_long": "Shorten this note before inserting it.",
+    "origin": "View source",
+    "edit": "Edit",
+    "delete": "Delete",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "cancel": "Cancel",
+    "close": "Close",
+    "finish_draft": "Save or clear the current draft first.",
+    "edit_hint": "Ready to edit above",
+    "delete_title": "Delete this note?",
+    "delete_body": "This cannot be undone. The source message will remain.",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "load_failed": "Could not load notes. Retry.",
+    "missing": "The original was deleted. Save as a new note.",
+    "save_failed": "Could not save. Your draft is kept.",
+    "delete_failed": "Could not delete. Retry.",
+    "discard": "Clear",
+    "discard_title": "Clear draft?",
+    "discard_body": "Unsaved text will be lost."
   }
 }

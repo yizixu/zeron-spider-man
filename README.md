@@ -116,7 +116,7 @@ Zeron will automatically validate, sign, and hot-reload the plugin.
 | 🌀 **3D Parallax depth** | `off` / `subtle` / `normal` / `deep` | `normal` | Cursor-tracking depth for skyline and foreground webs |
 | 🔔 **Spider-Sense notifications** | Switch | `true` | OS alerts for waiting, errored, finished chats, and low quota |
 | 🚨 **Quota alert threshold** | `10%` / `15%` / `25%` / `35%` | `15%` | Triggers crimson Spider-Sense alert below threshold |
-| ⚡ **Composer web & quick prompts** | Switch | `true` | Web filigree & quick-prompt bar below the composer |
+| ⚡ **Web toolbar** | Switch | `true` | Prompts, quick notes and web accents beneath the composer |
 | 📌 **Save message to Web button** | Switch | `true` | Hover button on chat messages to save to SQLite |
 | 🕸️ **Sidebar spider elements** | Switch | `true` | Sidebar Spider-Net divider & dangling patrol spider |
 | 🕷️ **Panel roaming spiders** | Switch | `true` | Animated multi-spider companions with layout-aware fading |
@@ -183,3 +183,9 @@ Every permission declared in [`zeron-plugin.json`](./zeron-plugin.json) maps dir
 Made with 🕸️ for **Zeron** · MIT License © 2026 [yizixu](https://github.com/yizixu)
 
 </div>
+
+## Web Notes
+
+Click **Quick note** in the web toolbar beneath the composer to capture an idea without leaving the conversation. Drafts are kept automatically; Ctrl+Enter saves. Notes link to the current conversation and project. **Keep as note** on a message captures its text and source.
+
+Click **Quick notes** in the web toolbar to search saved notes and insert one into the current draft in one step. Choose **New note** from the same picker to capture a fresh thought. Use **Spider Hub → Notes** when you need to search, edit, delete, or inspect sources. Notes live in the local plugin SQLite database, separate from saved prompts and snippets.

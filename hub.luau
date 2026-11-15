@@ -85,7 +85,7 @@ local function format_ago(ts: number): string
 	return `{math.floor(d / 86400)}d`
 end
 
-function M.register(zeron: any, active_tab: State<string>)
+function M.register(zeron: any, active_tab: State<string>, notes: any)
 	zeron.page {
 		id = "spider-hub",
 		title = zeron.t("page.title"),
@@ -1323,6 +1323,7 @@ function M.register(zeron: any, active_tab: State<string>)
 							look = "underline",
 							rule = true,
 							options = {
+								{ value = "notes", label = zeron.s("notes.tab"), icon = "pen", count = notes.count },
 								{
 									value = "radar",
 									label = zeron.s("hub.tab_radar"),
@@ -1344,8 +1345,8 @@ function M.register(zeron: any, active_tab: State<string>)
 						},
 						ui.presence(function(): string
 							local tab = active_tab:get()
-							if tab == "web" then
-								return "web"
+							if tab == "web" or tab == "notes" then
+								return tab
 							end
 							local s = radar.summary()
 							local sig_parts: { string } = {}
@@ -1357,6 +1358,7 @@ function M.register(zeron: any, active_tab: State<string>)
 							local dopen = if filter_drawer_open:get() then "1" else "0"
 							return `radar:{table.concat(sig_parts, ",")}:{radar.usage_rev()}:{radar.hidden_rev()}:{radar.events_rev()}:{radar.warn_threshold()}:{dopen}`
 						end, function(key: string): Node
+							if key == "notes" then return notes.build() end
 							if key == "web" then
 								return build_web_tab()
 							end
