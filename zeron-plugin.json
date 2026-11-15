@@ -1,8 +1,8 @@
 {
   "id": "spider-man",
-  "name": "蜘蛛侠",
-  "version": "1.3.0",
-  "description": "蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
+  "name": "Spider-Man / 蜘蛛侠",
+  "version": "1.3.1",
+  "description": "Spider-Verse NYC skyline wallpaper, Spider-Sense task & quota radar, and Web Snippets & Quick Prompts hub. / 蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
   "entry": "init.luau",
   "permissions": [
     "ui.add",
@@ -47,7 +47,7 @@
       "web_gauge.luau": "ebfa63a379c636360aff5900866d74be0e89ae504e4ef13957fe1b6d03384890",
       "zeron.luau": "4ff74eb343365f154565fb69883e5759df7e4d2ba49f513c8f03d28afe6747d9"
     },
-    "sig": "6sam6vAO_t03GgB8o4Qhg4y2po29Wk8g5-QCxbRQRbWkKcNKnSTnzwzRll5GL9dlyVm10Te7F9n37MqTtbRkAQ"
+    "sig": "CGOrnCTYkaXEq-NnAFoGq6p4EYp0ea0EXRSbF5ZEfSgcczyrhAfcqUFwHWdDqolWXlmsO-1ii-unDydkyQtxBw"
   },
   "icon": "icon.svg",
   "ui": {
@@ -55,55 +55,55 @@
       "#new-chat-background"
     ]
   },
-  "settings_description": "Zeron 蜘蛛侠主题伴侣。可在此将暗夜纽约天际线设为新对话壁纸，并自定义蜘蛛感应雷达、蛛网装饰与快捷效率工具。",
+  "settings_description": "Spider-Man companion: skyline, Spider-Sense radar and web tools / 蜘蛛侠伴侣：天际线、蜘蛛感应雷达与蛛网效率工具。",
   "settings": [
     {
       "kind": "wallpaper",
-      "section": "壁纸"
+      "section": "Wallpaper / 壁纸"
     },
     {
       "id": "parallax",
       "kind": "choice",
       "style": "segmented",
-      "section": "动效",
-      "label": "3D 视差深度",
-      "description": "城市天际线与前景蛛网随鼠标移动的幅度。",
+      "section": "Motion / 动效",
+      "label": "3D Parallax depth / 3D 视差深度",
+      "description": "How far the NYC skyline and foreground webs shift with the cursor. / 城市天际线与前景蛛网随鼠标移动的幅度。",
       "default": "normal",
       "options": [
         {
           "value": "off",
-          "label": "关闭",
-          "description": "保持背景静止不动。"
+          "label": "Off / 关闭",
+          "description": "Keep the background still / 保持背景静止不动。"
         },
         {
           "value": "subtle",
-          "label": "轻微"
+          "label": "Subtle / 轻微"
         },
         {
           "value": "normal",
-          "label": "标准"
+          "label": "Normal / 标准"
         },
         {
           "value": "deep",
-          "label": "深邃"
+          "label": "Deep / 深邃"
         }
       ]
     },
     {
       "id": "notify_events",
       "kind": "switch",
-      "section": "蜘蛛感应雷达",
-      "label": "蜘蛛感应系统通知",
-      "description": "后台会话需要确认、报错或账号余量过低时自动发送系统通知。",
+      "section": "Radar / 感应雷达",
+      "label": "Spider-Sense notifications / 蜘蛛感应系统通知",
+      "description": "Notify when a background session needs input/approval, errors, or quota drops low. / 后台会话等待确认、报错、完成或账号余量过低时自动弹通知提醒。",
       "default": true
     },
     {
       "id": "quota_warn_pct",
       "kind": "choice",
       "style": "segmented",
-      "section": "蜘蛛感应雷达",
-      "label": "额度警戒线",
-      "description": "当账号剩余额度低于该比例时触发红色蜘蛛感应警戒。",
+      "section": "Radar / 感应雷达",
+      "label": "Quota alert threshold / 额度警戒线",
+      "description": "Trigger Spider-Sense warning when remaining account quota drops below this percent. / 当账号剩余额度低于该比例时触发红色蜘蛛感应警戒。",
       "default": "15",
       "options": [
         {
@@ -127,33 +127,33 @@
     {
       "id": "show_composer_deco",
       "kind": "switch",
-      "section": "效率工具",
-      "label": "蛛网快捷栏",
-      "description": "在输入框下方显示快捷指令、随手记与蛛网装饰。",
+      "section": "Productivity / 效率工具",
+      "label": "Web toolbar / 蛛网快捷栏",
+      "description": "Show prompts, quick notes and web accents beneath the composer. / 在输入框下方显示快捷指令、随手记与蛛网装饰。",
       "default": true
     },
     {
       "id": "show_quick_save",
       "kind": "switch",
-      "section": "效率工具",
-      "label": "消息「存到蛛网」按钮",
-      "description": "鼠标悬停对话消息时显示一键收藏到蛛网按钮。",
+      "section": "Productivity / 效率工具",
+      "label": "Save message to Web button / 消息「存到蛛网」按钮",
+      "description": "Show a quick Save-to-Web button when hovering chat messages. / 鼠标悬停对话消息时显示一键收藏到蛛网按钮。",
       "default": true
     },
     {
       "id": "show_sidebar_deco",
       "kind": "switch",
-      "section": "界面装饰",
-      "label": "左侧边栏蜘蛛装饰",
-      "description": "在左侧边栏顶部显示蛛网分隔条，底部显示倒挂巡逻的小蜘蛛。",
+      "section": "Interface / 界面装饰",
+      "label": "Sidebar spider elements / 左侧边栏蜘蛛装饰",
+      "description": "Show the Spider-Net divider and dangling spider patrol footer in the left sidebar. / 在左侧边栏顶部显示蛛网分隔条，底部显示倒挂巡逻的小蜘蛛。",
       "default": true
     },
     {
       "id": "show_pet",
       "kind": "switch",
-      "label": "面板漫游小蜘蛛",
-      "description": "在窗口面板上放养一只会四处爬行、织网、垂丝并与会话交互的蜘蛛伙伴。",
-      "section": "界面装饰",
+      "label": "Panel roaming Spidey pet / 面板漫游小蜘蛛",
+      "description": "Keep an interactive Spider-Pet roaming, spinning webs, rappelling, and tracking sessions across the workspace. / 在窗口面板上放养一只会四处爬行、织网、垂丝并与会话交互的蜘蛛伙伴。",
+      "section": "Interface / 界面装饰",
       "default": true
     }
   ]
