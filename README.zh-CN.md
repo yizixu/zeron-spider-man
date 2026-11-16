@@ -10,7 +10,7 @@
 
 **纵横宇宙暗夜美学 · 「蜘蛛感应」任务与额度雷达 · 智能避让桌面蜘蛛伙伴 · 本地蛛网提示词库**
 
-[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.4.0-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
+[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.4.1-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
 [![Luau](https://img.shields.io/badge/技术栈-Luau-0ea5e9?style=for-the-badge&logo=lua&logoColor=white)](https://luau.org/)
 [![i18n](https://img.shields.io/badge/多语言-EN%20%7C%20%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-10b981?style=for-the-badge)](#-多语言文档)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-f59e0b?style=for-the-badge)](./LICENSE)
@@ -70,6 +70,8 @@
   </tr>
 </table>
 
+窗口最小化、隐藏或完全被遮挡时，插件暂停蜘蛛动画定时器、布局采样、壁纸动效、雷达事件监听、额度读取和插件通知。恢复窗口后续播动画并读取最新任务与额度状态，不补发隐藏期间的通知。已经开始的保存操作会正常完成，Zeron 中的 Agent 任务继续运行。
+
 ---
 
 ## 🎨 内置原画资源一览（`art/`）
@@ -89,7 +91,7 @@
 ## 🚀 安装方式
 
 ### 方式一：下载 `.zeron-plugin` 一键安装（推荐）
-1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.4.0.zeron-plugin`。
+1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.4.1.zeron-plugin`。
 2. 在 **Zeron** 中打开 **设置 → 插件 → 从文件安装**（或直接拖入 / 调用 `install_plugin`）。
 3. 启用 **蜘蛛侠（Spider-Man）**，并可在插件设置中一键启用新对话壁纸与各类开关。
 

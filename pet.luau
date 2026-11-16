@@ -463,6 +463,9 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 			end
 			local win_w = layout.win_w
 			local stage_y = layout.stage_y
+			local window_shown = ui.computed(function(): boolean
+				return zeron.window().shown
+			end)
 
 			local function max_by(reactive: boolean?): number
 				return layout.max_by(reactive)
@@ -624,8 +627,43 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 			local completed_pending: { [string]: { title: string } } = {}
 			local swung_done: { [string]: boolean } = {}
 			local sync_rev = ui.use_state(0)
+			local session_snapshot: { [string]: { status: string, updated: number } }? = nil
+			local resuming = false
+			local paused_at: number? = nil
 
 			local route_live = zeron.live("route")
+
+			local function pause_animation()
+				if paused_at == nil then
+					paused_at = ui.now() / 1000
+					hovered_slot:set(0)
+					hovered_whisper:set(0)
+				end
+			end
+
+			local function resume_animation()
+				if paused_at == nil then
+					return
+				end
+				local now_s = ui.now() / 1000
+				local elapsed = math.max(0, now_s - paused_at)
+				paused_at = nil
+				for _, sl in slots do
+					sl.mode_until += elapsed
+					sl.whisper_until += elapsed
+				end
+				for _, state in web_slots do
+					local web = state:peek()
+					if web then
+						local resumed = table.clone(web)
+						resumed.born += elapsed
+						state:set(resumed)
+					end
+				end
+				last_web_clock += elapsed
+				last_stage_pub += elapsed
+				clock_now:set(now_s)
+			end
 
 			local function is_pet_on(): boolean
 				return show_pet:get() == true
@@ -738,6 +776,9 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 
 			-- Wire Zeron turn events for immediate completion freeze + new-turn wakeup
 			ui.effect(function()
+				if not window_shown:get() then
+					return
+				end
 				local stops: { () -> () } = {}
 				pcall(function()
 					table.insert(stops, zeron.on("turn.started", function(e: any)
@@ -783,6 +824,12 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 
 			-- Reactive session -> spider slot reconciliation
 			ui.effect(function()
+				if not window_shown:get() then
+					resuming = true
+					pause_animation()
+					return
+				end
+				resume_animation()
 				local _rev = sync_rev:get()
 				if show_pet:get() ~= true then
 					menu_slot_idx:set(0)
@@ -810,18 +857,30 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 					quota_label = zeron.s("pet.quota_none")
 				end
 
+				local next_snapshot: { [string]: { status: string, updated: number } } = {}
 				for sid, rec in all_sessions do
 					local st = tostring(rec.status or "")
+					local updated = tonumber(rec.updated) or 0
+					local previous = if session_snapshot then session_snapshot[sid] else nil
+					-- Hidden windows have no turn subscriptions. Recover the latest
+					-- completion against a visible baseline; first visibility must
+					-- not replay all historical completions as new notifications.
+					local finished_while_hidden = resuming and session_snapshot ~= nil and (st == "done" or st == "failed")
+						and (previous == nil or previous.status ~= st or previous.updated ~= updated)
+					next_snapshot[sid] = { status = st, updated = updated }
 					if st == "working" or st == "connecting" or st == "waiting" then
 						seen_working[sid] = true
 						completed_pending[sid] = nil
 						swung_done[sid] = nil
-					elseif seen_working[sid] then
+					elseif seen_working[sid] or finished_while_hidden then
 						seen_working[sid] = nil
+						swung_done[sid] = nil
 						local stitle = if type(rec.title) == "string" and rec.title ~= "" then rec.title else sid
 						completed_pending[sid] = { title = stitle }
 					end
 				end
+				session_snapshot = next_snapshot
+				resuming = false
 
 				-- Only auto-swing when the user newly navigates INTO a completed_pending session
 				if route_changed and cur_route_sid and completed_pending[cur_route_sid] then
@@ -953,6 +1012,11 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 
 			-- Pure animation timer (stopped automatically when hidden/disabled or reduced-motion is enabled)
 			ui.effect(function()
+				if not window_shown:get() then
+					pause_animation()
+					return
+				end
+				resume_animation()
 				if show_pet:get() ~= true or motion.reduced() then
 					for _, sl in slots do
 						if sl.active:peek() and sl.phase:peek() == "swing" then
@@ -986,10 +1050,6 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 					last_tick_ms = now_ms
 					tick_seq += 1
 
-					local win = zeron.window(true)
-					if not win.shown or motion.reduced() then
-						return
-					end
 					local any_active = false
 					for _, sl in slots do
 						if sl.active:peek() then

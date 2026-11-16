@@ -119,10 +119,12 @@ zeron.place {
 	replace = function(): Node
 		local pointer = zeron.live("pointer")
 		return ui.presence(function(): string
+			if not zeron.window().shown then return "hidden" end
 			local reach = if motion.reduced() then 0 else (REACH[parallax:get()] or 1)
 			local app = if is_light_theme() then "light" else "dark"
 			return `{reach}:{app}`
 		end, function(key: string): Node
+			if key == "hidden" then return ui.div { w_full = true, h_full = true } end
 			local r_str, app = string.match(key, "^([^:]+):(.+)$")
 			return SpiderScene(tonumber(r_str) or 1, pointer, app == "light")
 		end, { w_full = true, h_full = true })

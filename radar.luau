@@ -35,6 +35,14 @@ export type SignalEvent = {
 	at: number,
 }
 
+type Summary = {
+	working: { SessionItem },
+	attention: { SessionItem },
+	failed: { SessionItem },
+	min_quota: number?,
+	low_quota: boolean,
+}
+
 local USAGE_LIST: State<{ AccountUsage }> = ui.state("spider_radar_usage", {} :: { AccountUsage })
 local MIN_ACTIVE_QUOTA: State<number?> = ui.state("spider_radar_min_quota", nil :: number?)
 local EVENTS: State<{ SignalEvent }> = ui.state("spider_radar_events", {} :: { SignalEvent })
@@ -55,6 +63,11 @@ local stop_fns: { () -> () } = {}
 local threshold_stop: (() -> ())? = nil
 local fetch_seq = 0
 local refresh_seq = 0
+local last_summary: Summary = { working = {}, attention = {}, failed = {}, min_quota = nil, low_quota = false }
+
+local function window_shown(peek: boolean?): boolean
+	return zeron_ref ~= nil and zeron_ref.window(peek).shown
+end
 
 -- Providers that commonly remain in cached usage even when disabled/uninstalled
 -- or when they emit no quota windows; only applied on initial auto-filter seed.
@@ -110,6 +123,7 @@ local function recompute_min_quota(list: { AccountUsage })
 end
 
 local function push_event(kind: string, title: string, body: string, session: string?)
+	if not window_shown(true) then return end
 	local prev = EVENTS:peek()
 	local next_list: { SignalEvent } = {
 		{ kind = kind, title = title, body = body, session = session, at = os.time() },
@@ -221,7 +235,7 @@ local function parse_usage(rows: any)
 end
 
 function M.fetch_usage()
-	if not zeron_ref then
+	if not window_shown(true) then
 		return
 	end
 	fetch_seq += 1
@@ -234,12 +248,12 @@ function M.fetch_usage()
 		return
 	end
 	promise:after(function(rows: any)
-		if seq ~= fetch_seq or zeron_ref ~= z then
+		if seq ~= fetch_seq or zeron_ref ~= z or not window_shown(true) then
 			return
 		end
 		parse_usage(rows)
 	end, function(_err: any)
-		if seq ~= fetch_seq or zeron_ref ~= z then
+		if seq ~= fetch_seq or zeron_ref ~= z or not window_shown(true) then
 			return
 		end
 		-- Clear stale cached quota when permission is revoked, service is offline, or read fails.
@@ -250,7 +264,7 @@ function M.fetch_usage()
 end
 
 function M.refresh_usage()
-	if not zeron_ref or REFRESHING:peek() then
+	if not window_shown(true) or REFRESHING:peek() then
 		return
 	end
 	refresh_seq += 1
@@ -265,13 +279,13 @@ function M.refresh_usage()
 		return
 	end
 	promise:after(function()
-		if rseq ~= refresh_seq or zeron_ref ~= z then
+		if rseq ~= refresh_seq or zeron_ref ~= z or not window_shown(true) then
 			return
 		end
 		REFRESHING:set(false)
 		M.fetch_usage()
 	end, function(err: any)
-		if rseq ~= refresh_seq or zeron_ref ~= z then
+		if rseq ~= refresh_seq or zeron_ref ~= z or not window_shown(true) then
 			return
 		end
 		REFRESHING:set(false)
@@ -375,13 +389,10 @@ function M.warn_threshold(): number
 	return 15
 end
 
-function M.summary(): {
-	working: { SessionItem },
-	attention: { SessionItem },
-	failed: { SessionItem },
-	min_quota: number?,
-	low_quota: boolean,
-}
+function M.summary(): Summary
+	-- Read visibility before sessions so hidden views unsubscribe from their
+	-- changes instead of repeatedly scanning and sorting the session list.
+	if not window_shown() then return last_summary end
 	local working: { SessionItem } = {}
 	local attention: { SessionItem } = {}
 	local failed: { SessionItem } = {}
@@ -425,17 +436,18 @@ function M.summary(): {
 
 	local mq = MIN_ACTIVE_QUOTA:get()
 	local low = mq ~= nil and mq <= M.warn_threshold()
-	return {
+	last_summary = {
 		working = working,
 		attention = attention,
 		failed = failed,
 		min_quota = mq,
 		low_quota = low,
 	}
+	return last_summary
 end
 
 local function maybe_notify(title: string, body: string, session: string?)
-	if not zeron_ref or not notify_setting or notify_setting:peek() ~= true then
+	if not window_shown(true) or not notify_setting or notify_setting:peek() ~= true then
 		return
 	end
 	pcall(function()
@@ -456,13 +468,14 @@ end
 
 local function bind_threshold_listener(below_pct: number?)
 	stop_threshold_listener()
-	if not zeron_ref then
+	if not window_shown(true) then
 		return
 	end
 	local z = zeron_ref
 	local target = below_pct or M.warn_threshold()
 	pcall(function()
 		threshold_stop = z.on("usage.threshold", function(e: any)
+			if not wired or not window_shown(true) then return end
 			local prov = tostring((e and e.provider) or "agent")
 			if current_hidden_map()[prov] then
 				return
@@ -475,12 +488,6 @@ local function bind_threshold_listener(below_pct: number?)
 			maybe_notify(title, body, nil)
 		end, { below = target })
 	end)
-end
-
-function M.ensure_wired()
-	if not wired and zeron_ref then
-		M.init(zeron_ref, notify_setting, warn_pct_setting)
-	end
 end
 
 function M.cleanup()
@@ -496,31 +503,14 @@ function M.cleanup()
 	wired_zeron = nil
 end
 
-function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
-	if wired and wired_zeron ~= zeron then
-		M.cleanup()
-	end
-	zeron_ref = zeron
-	notify_setting = notify_opt
-	warn_pct_setting = warn_pct_opt
-	hidden_store = zeron.store("spider_hidden_providers_v1", {})
-	seeded_store = zeron.store("spider_hidden_seeded_v2", false)
-
-	if setting_wired_zeron ~= zeron then
-		setting_wired_zeron = zeron
-		zeron.on_setting(function(id: string, value: any)
-			if id == "quota_warn_pct" and wired and wired_zeron == zeron then
-				bind_threshold_listener(tonumber(value) or M.warn_threshold())
-			end
-		end)
-	end
-
-	M.fetch_usage()
-	if wired then
+function M.ensure_wired()
+	if wired or not window_shown(true) then
 		return
 	end
+	local zeron = zeron_ref
 	wired = true
 	wired_zeron = zeron
+	M.fetch_usage()
 
 	local function add_listener(stop: (() -> ())?)
 		if type(stop) == "function" then
@@ -536,6 +526,7 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 			M.fetch_usage()
 		end))
 		add_listener(zeron.on("limit.hit", function(e: any)
+			if not wired or not window_shown(true) then return end
 			M.fetch_usage()
 			local prov = tostring((e and e.provider) or "agent")
 			if current_hidden_map()[prov] then
@@ -547,9 +538,10 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 			push_event("quota", title, body, e and e.chat)
 			maybe_notify(title, body, e and e.chat)
 		end))
-		bind_threshold_listener(nil)
+		bind_threshold_listener(tonumber(warn_pct_setting:peek()) or 15)
 
 		add_listener(zeron.on("chat.awaiting_input", function(e: any)
+			if not wired or not window_shown(true) then return end
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.awaiting_title")
@@ -559,6 +551,7 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 		end))
 
 		add_listener(zeron.on("turn.errored", function(e: any)
+			if not wired or not window_shown(true) then return end
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.errored_title")
@@ -568,6 +561,7 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 		end))
 
 		add_listener(zeron.on("turn.finished", function(e: any)
+			if not wired or not window_shown(true) then return end
 			local cid = e and e.chat
 			local stitle = session_title(cid)
 			local title = zeron.s("notify.finished_title")
@@ -578,6 +572,31 @@ function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
 				maybe_notify(title, body, cid)
 			end
 		end))
+	end)
+end
+
+function M.init(zeron: any, notify_opt: any, warn_pct_opt: any)
+	M.cleanup()
+	zeron_ref = zeron
+	notify_setting = notify_opt
+	warn_pct_setting = warn_pct_opt
+	hidden_store = zeron.store("spider_hidden_providers_v1", {})
+	seeded_store = zeron.store("spider_hidden_seeded_v2", false)
+
+	if setting_wired_zeron ~= zeron then
+		setting_wired_zeron = zeron
+		zeron.on_setting(function(id: string, value: any)
+			if id == "quota_warn_pct" and wired and wired_zeron == zeron then
+				bind_threshold_listener(tonumber(value) or M.warn_threshold())
+			end
+		end)
+	end
+
+	-- Only visibility changes restart subscriptions, not losing keyboard focus.
+	local shown = ui.computed(function(): boolean return zeron.window().shown end)
+	ui.effect(function()
+		if shown:get() then M.ensure_wired() end
+		return M.cleanup
 	end)
 end
 
