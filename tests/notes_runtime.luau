@@ -277,6 +277,28 @@ do
 	print("PASS direct note picker")
 end
 
+-- A dropdown option is one line even when the stored note is a full reply.
+-- Its whole text remains searchable, and insertion keeps the original text.
+do
+	local h = host()
+	local notes = h.Notes.new(h.zeron)
+	local content = "\r\n# 修复记录\r\n\r\n1. 第一项\r\n\treturn value\n2. 最后的关键词 🕸\r\n"
+	local saved = row(23, content)
+	saved.session_title = "来源会话\n第二行"
+	h.take("exec").resolve({ changes = 0 })
+	h.take("query").resolve({ saved })
+	local toolbar = notes.toolbar(h.zeron.live("session"), h.zeron.live("route"))
+	local picker = find(toolbar, "dropdown")
+	local option = picker.props.items()[1]
+	same(option.label, "# 修复记录 1. 第一项 return value 2. 最后的关键词 🕸", "multiline note becomes a single-line preview")
+	same(option.hint, "来源会话 第二行", "source label stays on one line")
+	assert(string.find(option.label, "最后的关键词", 1, true), "search reaches the end of the note")
+	picker.props.on_choose("23")
+	same(h.composed[1], content, "insertion retains original line breaks and indentation")
+	same(h.compose_options[1].replace, false, "insertion preserves the existing draft")
+	print("PASS multiline note preview")
+end
+
 -- Navigation only stages a transfer. Wrong-session insertion never writes.
 do
 	local h = host()
@@ -521,4 +543,4 @@ do
 	print("PASS quick prompt editing and retry")
 end
 
-print("PASS 14 runtime scenarios")
+print("PASS 15 runtime scenarios")

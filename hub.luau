@@ -97,7 +97,7 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 			local new_title = ui.use_state("")
 			local new_content = ui.use_state("")
 			local filter_drawer_open = ui.use_state(false)
-			local expanded_cards = ui.use_state({} :: { [number]: boolean })
+			local expanded_cards = ui.use_state({} :: { [string]: boolean })
 			local editing_id = ui.use_state(0)
 			local edit_title = ui.use_state("")
 			local edit_content = ui.use_state("")
@@ -776,7 +776,7 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 						or string.find(string.lower(it.content), q, 1, true) ~= nil
 					if kind_ok and search_ok then
 						local is_prompt = it.kind == "prompt"
-						local is_expanded = exp_map[it.id] == true
+						local is_expanded = exp_map[tostring(it.id)] == true
 						local is_long = #it.content > 140 or string.find(it.content, "\n", 1, true) ~= nil
 						local item_id = it.id
 						local item_title = it.title
@@ -915,7 +915,8 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 										size = "xs",
 										on_click = function()
 											local next_exp = table.clone(expanded_cards:peek())
-											next_exp[item_id] = not (next_exp[item_id] == true)
+											local key = tostring(item_id)
+											next_exp[key] = not (next_exp[key] == true)
 											expanded_cards:set(next_exp)
 										end,
 										ui.text { zeron.t(if is_expanded then "hub.collapse_btn" else "hub.expand_btn") },

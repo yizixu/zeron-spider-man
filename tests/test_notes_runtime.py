@@ -35,7 +35,7 @@ class NotesRuntimeTests(unittest.TestCase):
                 timeout=20,
             )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("PASS 14 runtime scenarios", result.stdout)
+        self.assertIn("PASS 15 runtime scenarios", result.stdout)
 
 
 if __name__ == "__main__":

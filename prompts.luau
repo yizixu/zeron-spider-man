@@ -159,9 +159,9 @@ function M.toolbar(zeron: any, session_live: () -> any): Node
 			trigger = function(menu: any): Node
 				return ToolbarButton {
 					lit = function() return menu.open:get() end,
-					label = zeron.t("composer.tagline"), on_click = menu.toggle,
+					label = zeron.t("composer.tagline"), tooltip = zeron.s("composer.tagline"), on_click = menu.toggle,
 					Icon { name = "fast-tier", size = 13 },
-					ui.text { function() return `{zeron.s("composer.tagline")} ({#db.prompts()})` end, literal = true },
+					ui.text { function() return tostring(#db.prompts()) end, literal = true, tabular = true },
 				}
 			end,
 		},

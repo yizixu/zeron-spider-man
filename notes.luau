@@ -186,10 +186,14 @@ function M.new(zeron: any): any
 		local function note_items(): { any }
 			local out = {}
 			for _, note in store.items() do
+				-- Dropdown rows have a fixed single-line height. Keep every word
+				-- searchable while leaving the saved text intact for insertion.
+				local label = trim((string.gsub(note.content, "%s+", " ")))
+				local hint = trim((string.gsub(note.session_title or note.project or "", "%s+", " ")))
 				table.insert(out, {
 					value = tostring(note.id),
-					label = note.content,
-					hint = note.session_title or note.project or "",
+					label = label,
+					hint = if hint ~= "" then hint else nil,
 					icon = "pen",
 				})
 			end
@@ -262,14 +266,14 @@ function M.new(zeron: any): any
 				trigger = function(menu: any): Node
 					return ToolbarButton {
 						lit = function() return menu.open:get() end,
-						label = zeron.t("notes.title"),
+						label = zeron.t("notes.title"), tooltip = zeron.s("notes.title"),
 						on_click = menu.toggle,
 						Icon { name = "pen", size = 13 },
 						ui.text {
 							function(): string
-								return `{zeron.s("notes.quick")} ({api.count()})`
+								return tostring(api.count())
 							end,
-							literal = true,
+							literal = true, tabular = true,
 						},
 					}
 				end,

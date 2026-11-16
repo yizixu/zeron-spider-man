@@ -72,6 +72,10 @@
 
 When the window is minimized, hidden, or fully covered, the plugin pauses spider animation timers, layout sampling, wallpaper motion, radar event subscriptions, quota reads, and plugin notifications. Restoring the window resumes the animation and reloads the latest task and quota state; notifications from the hidden period are not replayed. Saves already in progress can finish, and Zeron's agent tasks continue normally.
 
+When an AI reply lists several issues, hover it and choose **Add to checklist** to open the checklist in the right panel. Expand a title to read the details, check off each item, or append an individual issue to your draft. Reopen the tab using the checklist icon below the composer. Checklists are stored locally per conversation, and importing the same reply twice does not add duplicates. The side panel tab requires `panel.tabs` permission.
+
+Choose **Select** at the top of the checklist to select several items or all items, then add them to the draft, mark them complete, or confirm removal. Selection does not change completion status; Cancel clears the selection. Adding to the draft, completing, or removing items successfully exits selection mode; a failure or canceled removal keeps the selection. Bulk insertion follows checklist order and preserves the existing draft. If the combined content is too long, choose fewer items.
+
 ---
 
 ## 🎨 Built-in Artwork (`art/`)

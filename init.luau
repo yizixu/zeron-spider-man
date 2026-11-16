@@ -10,6 +10,7 @@ local db = require("./db")
 local radar = require("./radar")
 local hub = require("./hub")
 local Notes = require("./notes")
+local Checklist = require("./checklist")
 local pet = require("./pet")
 local layout = require("./layout")
 
@@ -28,6 +29,8 @@ db.init(zeron)
 radar.init(zeron, notify_events, quota_warn_pct)
 local notes = Notes.new(zeron)
 notes.register()
+local checklist = Checklist.new(zeron)
+checklist.register()
 hub.register(zeron, active_tab, notes)
 pet.register(zeron, show_pet, radar.ensure_wired, radar.cleanup)
 
@@ -140,6 +143,7 @@ zeron.place {
 	after = function(): Node
 		local route_live = zeron.live("route")
 		local session_live = zeron.live("session")
+		local panel_live = zeron.live("panel")
 
 		local function build_header(): Node
 			return ui.row {
@@ -173,6 +177,7 @@ zeron.place {
 				Prompts.toolbar(zeron, session_live),
 				ui.div { w = 1, h = 10, bg = "$border", shrink = 0 },
 				notes.toolbar(session_live, route_live),
+				checklist.toolbar(panel_live),
 				ui.row {
 					grow = 1,
 					min_w = 0,

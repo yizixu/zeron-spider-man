@@ -1,7 +1,7 @@
 {
   "id": "spider-man",
   "name": "Spider-Man / 蜘蛛侠",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Spider-Verse NYC skyline wallpaper, Spider-Sense task & quota radar, and Web Snippets & Quick Prompts hub. / 蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
   "entry": "init.luau",
   "permissions": [
@@ -12,6 +12,7 @@
     "notifications",
     "compose",
     "pages.add",
+    "panel.tabs",
     "messages.read",
     "navigate"
   ],
@@ -19,8 +20,8 @@
     "key": "pcWlo9mZ00_vEnTKvrCXEKoa3TvvTMeiaeQ4AMHnCiI",
     "files": {
       "LICENSE": "eaca14ccc6a94bd9c86b144da274d433a96f00614527cc258edafb7d4a43778f",
-      "README.md": "0a6612b9533ef21b6196f02136a5048f67011ebf54fe00b9e4bcb2996175dc8a",
-      "README.zh-CN.md": "8a0c81b0c410f2f581abc58428deb2738c3309d1eb8f3cdf5ef79bb3f531a118",
+      "README.md": "fa4f025356c464582cdfb9e5e06ad9bb88d17bb9bac08c2adea4f267a0582473",
+      "README.zh-CN.md": "a317687734ef49ab983a6a5a51c7d4a5c46612c51a7fe33a3545f140d42582b3",
       "art/hanging-spider.webp": "0ec844466e97db3e6d9a51326fee7d9ae072c58892c3856381ac818e22cc176e",
       "art/sidebar-hanging-spider.webp": "615249addd136c42d2b7e6fd0efdb0d0585e736c34c6dc04ef559a926dcf89fa",
       "art/skyline-light.webp": "d7f5adcff97a4d86b1bd8ada07cc87ecc65b920ffaa234aa703f276bce5f734c",
@@ -32,23 +33,26 @@
       "art/web-near.webp": "7ad9200a70e2bd05bb49cbae20fc5b707d5550a6d828177c56b4bcae4d5af42a",
       "art/web-right-light.webp": "5ae3c0131a522dd251cd2cea0b41c05513921a71d9b49210d7584de48d52eefa",
       "art/web-right.webp": "2fbbca7053412e5d8dce6102d4fb831cc8cfe6829d643acc5cd7fce5545b4308",
+      "checklist.luau": "f4282bc6ce19ada1fc973e75b1eae37e849918c1a12567216b812d9429ee0819",
+      "checklist_parse.luau": "8c05641ceb1670e3a4456253260ffe74f5918d6b0855c0eee58047ffd8caa922",
+      "checklist_store.luau": "0f4ebed08ea8bc21122a38108a2150b737527430ae57db1782780a8873565e3f",
       "db.luau": "6ebe1e38571fd982efe6b2db7d9462e40e5256c678caf8b47a6b7e5901948d36",
-      "hub.luau": "7791958d45b37ca8e2a38e07c1d62431e8802c2d7320ce9f184397b5fbcd153e",
+      "hub.luau": "1c7c84a1721c15ca67b68a930ef01a25ca596e4c6defa42612f2cea010f6e952",
       "icon.svg": "d57a40e73bc9c956728b7ed8465a0f2cfe21eb983375bc70f99fd35668bdc70b",
-      "init.luau": "3ef5fa7d54606f5d38b68623c4ddce7b217068df5333989d69084100036d5d3b",
+      "init.luau": "c09b746fbfe8eeff80e4f568e22faae633bebda01f1c5e4868b91d9fd92244b4",
       "layout.luau": "162e989ca8f933d61f7a5ebdf3e1ffa28ba7cfe8c7657afaf65ea1ae03a8305b",
-      "locales/en.json": "f5c30473ee4a96fb1479d2051aae016993a9f1e2000144d842ec0e5d25c493dd",
-      "locales/zh-Hans.json": "9348212dce5d4dd016ff6dca1af76ec0ec4efd496f373fd84f11c0aa800b448b",
-      "notes.luau": "6b4c77aaed38be5aa7690205859e1aae22c401870e62cae815cc8a65f1d70933",
+      "locales/en.json": "714de10b60df2f5dbdc6a83b8b4dc3d1b469ca8176dda7f74d6763582dd92568",
+      "locales/zh-Hans.json": "74f078b46f74abf000f0140be2ddd235f933652aae85af3f06a7e1f9f00ec2a4",
+      "notes.luau": "62eec69b42825093194a9969caa68c91b4e4821254efbb2311633559582dc8b5",
       "notes_store.luau": "9ab5e8c2dd093efed3d80dce21b913d20784b781513e8ff70d044866d2ca0c2b",
       "pet.luau": "5983e3d0a03060f9fe3811a449ddecfc92b6b2f688f992960886f31c0c757998",
-      "prompts.luau": "11e04eceb4f8301a06b4fc2f46e03efb301bdbf7cd7b2ae9c6b3eed4471d3a94",
+      "prompts.luau": "375d7296cf9b1e5375d45483fc2d811d9e9226d67d72eac87a0c440c1fa87fef",
       "radar.luau": "9547d5df8672bb8fdcc4bf6ef9efa9b137ec99c377d9d9f12b904e13f8a25206",
       "toolbar_button.luau": "876dafca164f59f67366314edc125345039a73a32a4f59eff7b2bf2f414da4e7",
       "web_gauge.luau": "ebfa63a379c636360aff5900866d74be0e89ae504e4ef13957fe1b6d03384890",
       "zeron.luau": "4ff74eb343365f154565fb69883e5759df7e4d2ba49f513c8f03d28afe6747d9"
     },
-    "sig": "YavkKFIAIg5E4SFu3dUERIrDy3PIDPM9aChp-Bpq9XZxyVFrlyNuqPzjlVZ97xZff9zvH4X0Tpcts2zThuPIDg"
+    "sig": "E8_67kmaCmSm3yHPThESMpzJ0Vc7xUSYbBweoCuCovx74D2jETMggK4fsPnR8gp909m7S7dAtXy92jyTNDrlDQ"
   },
   "icon": "icon.svg",
   "ui": {
