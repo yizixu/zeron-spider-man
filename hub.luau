@@ -1222,7 +1222,7 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 									h_full = true,
 									opacity = if mode == "light" then 0.34 else 0.16,
 									ui.image {
-										src = if mode == "light" then "art/skyline-light.webp" else "art/skyline.webp",
+										src = if mode == "light" then "art/skyline-dawn.webp" else "art/skyline-neon.webp",
 										w_full = true,
 										h_full = true,
 										fit = "cover",

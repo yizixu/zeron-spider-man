@@ -297,6 +297,10 @@ do
 		if type(v) == "table" and v.sang and v.hop == 6 and v.st == 0 then swingPose = s end
 	end
 	assert(swingPose, "task finished while hidden restores its completed spider")
+	spider.on_hover(true)
+	h.tick(20)
+	same(swingPose:peek().st, 0.02, "hovered Spider-Man swing keeps moving")
+	spider.on_hover(false)
 	h.tick(20)
 	local before = table.clone(swingPose:peek())
 	h.shown:set(false)

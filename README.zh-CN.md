@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./art/skyline.webp" alt="Zeron 蜘蛛侠暗夜纽约天际线壁纸" width="100%" />
+<img src="./art/skyline-neon.webp" alt="Zeron 蜘蛛侠暗夜纽约天际线壁纸" width="100%" />
 
 <br />
 
@@ -84,7 +84,7 @@
 
 | 暗夜纽约天际线 | 蜘蛛徽章 | 倒挂巡逻小蜘蛛 | 前景蛛网纹理 |
 | :---: | :---: | :---: | :---: |
-| <img src="./art/skyline.webp" width="240" alt="暗夜纽约天际线" /> | <img src="./art/spider-crest.webp" width="120" alt="蜘蛛徽章" /> | <img src="./art/sidebar-hanging-spider.webp" width="120" alt="倒挂小蜘蛛" /> | <img src="./art/web-near.webp" width="240" alt="前景蛛网" /> |
+| <img src="./art/skyline-neon.webp" width="240" alt="暗夜纽约天际线" /> | <img src="./art/spider-crest.webp" width="120" alt="蜘蛛徽章" /> | <img src="./art/sidebar-hanging-spider.webp" width="120" alt="倒挂小蜘蛛" /> | <img src="./art/web-near.webp" width="240" alt="前景蛛网" /> |
 
 | 左侧蛛网 | 右侧蛛网 | 顶栏垂丝小蜘蛛 | 插件图标（`icon.svg`） |
 | :---: | :---: | :---: | :---: |

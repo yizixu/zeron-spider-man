@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./art/skyline.webp" alt="Zeron Spider-Man NYC Skyline Wallpaper" width="100%" />
+<img src="./art/skyline-neon.webp" alt="Zeron Spider-Man NYC Skyline Wallpaper" width="100%" />
 
 <br />
 
@@ -84,7 +84,7 @@ All visuals shown below are the **actual built-in assets** shipped inside the pl
 
 | NYC Night Skyline | Spider Crest | Dangling Patrol Spider | Foreground Web Filigree |
 | :---: | :---: | :---: | :---: |
-| <img src="./art/skyline.webp" width="240" alt="NYC Skyline" /> | <img src="./art/spider-crest.webp" width="120" alt="Spider Crest" /> | <img src="./art/sidebar-hanging-spider.webp" width="120" alt="Sidebar Hanging Spider" /> | <img src="./art/web-near.webp" width="240" alt="Foreground Web" /> |
+| <img src="./art/skyline-neon.webp" width="240" alt="NYC Skyline" /> | <img src="./art/spider-crest.webp" width="120" alt="Spider Crest" /> | <img src="./art/sidebar-hanging-spider.webp" width="120" alt="Sidebar Hanging Spider" /> | <img src="./art/web-near.webp" width="240" alt="Foreground Web" /> |
 
 | Left Corner Web | Right Corner Web | Titlebar Hanging Spider | Plugin Icon (`icon.svg`) |
 | :---: | :---: | :---: | :---: |

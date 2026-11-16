@@ -196,7 +196,6 @@ local function SpiderActorCanvas(props: { slot: SpiderSlot }): Node
 			local leg_col = ink.canvas({ token = "text.primary", alpha = 0.85 })
 			local leg_hi = ink.canvas({ token = "accent", alpha = 0.90 })
 			local light = is_light_theme()
-			local shadow_c = if light then "#00000024" else ink.canvas({ token = "background", alpha = 0.42 })
 			local eye_c = "#ffffff"
 			local eye_rim = if light then "#090d16" else ink.canvas("background")
 
@@ -329,8 +328,8 @@ local function SpiderActorCanvas(props: { slot: SpiderSlot }): Node
 				return cx + lx * cos_h - ly * sin_h, cy + lx * sin_h + ly * cos_h
 			end
 
-			local sx, sy = rot(-1, 2)
-			c:circle(sx, sy + 2, 10, shadow_c)
+			-- The shadow follows the body without rotating with its heading.
+			c:circle(cx, cy + 2, 10, "#00000024")
 
 			if ph == "completed" then
 				local pulse = 0.5 + 0.5 * math.sin(walk_p * 1.1)
@@ -1124,12 +1123,12 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 						if sl.active:peek() then
 							local ph = sl.phase:peek()
 							local is_hovered = is_slot_hovered(sl)
-							if is_hovered then
+							if is_hovered and ph ~= "swing" then
 								sl.whisper_until += dt
 								if ph == "peek" or ph == "weave" or ph == "rappel" then
 									sl.mode_until += dt
 								end
-								-- Freeze the whole pose, including swing progress and hop offset.
+								-- Freeze ordinary spider poses while the pointer is over them.
 								continue
 							elseif sl.whisper:peek() ~= nil and now_s > sl.whisper_until then
 								sl.whisper:set(nil)

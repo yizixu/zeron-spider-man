@@ -110,7 +110,7 @@ local function SpiderScene(reach: number, pointer: () -> any, light: boolean): N
 		overflow = "hidden",
 		role = "img",
 		label = zeron.t("wallpaper.aria_label"),
-		layer(if light then "art/skyline-light.webp" else "art/skyline.webp", 0.6),
+		layer(if light then "art/skyline-dawn.webp" else "art/skyline-neon.webp", 0.6),
 		layer(if light then "art/web-near-light.webp" else "art/web-near.webp", 1.8),
 	}
 end

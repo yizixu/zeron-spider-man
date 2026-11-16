@@ -1,7 +1,7 @@
 {
   "id": "spider-man",
   "name": "Spider-Man / 蜘蛛侠",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Spider-Verse NYC skyline wallpaper, Spider-Sense task & quota radar, and Web Snippets & Quick Prompts hub. / 蜘蛛侠主题界面、实时任务与额度「蜘蛛感应」雷达，以及本地蛛网收藏与快捷指令中心。",
   "entry": "init.luau",
   "permissions": [
@@ -20,12 +20,12 @@
     "key": "pcWlo9mZ00_vEnTKvrCXEKoa3TvvTMeiaeQ4AMHnCiI",
     "files": {
       "LICENSE": "eaca14ccc6a94bd9c86b144da274d433a96f00614527cc258edafb7d4a43778f",
-      "README.md": "fa4f025356c464582cdfb9e5e06ad9bb88d17bb9bac08c2adea4f267a0582473",
-      "README.zh-CN.md": "a317687734ef49ab983a6a5a51c7d4a5c46612c51a7fe33a3545f140d42582b3",
+      "README.md": "7f486789a9b70f70c21b7788f4d1583f85d6174bef3d1dd865b9827e49149083",
+      "README.zh-CN.md": "99b54b3e9f6a6344ed692e7e4d615206d4974b58467afcfa97574daa1d29b167",
       "art/hanging-spider.webp": "0ec844466e97db3e6d9a51326fee7d9ae072c58892c3856381ac818e22cc176e",
       "art/sidebar-hanging-spider.webp": "615249addd136c42d2b7e6fd0efdb0d0585e736c34c6dc04ef559a926dcf89fa",
-      "art/skyline-light.webp": "d7f5adcff97a4d86b1bd8ada07cc87ecc65b920ffaa234aa703f276bce5f734c",
-      "art/skyline.webp": "75276eaf1c4b404cf7b33aa8d260685ad3a39c736f98370acc5061fa5b5d4b00",
+      "art/skyline-dawn.webp": "d2a4c240de5e304a05b974f39ec8995e70f6eabb5f38d7b9c77a13bbbbb0260d",
+      "art/skyline-neon.webp": "a63c787f73e5c3e89b8b9868f4b607d7266f3d2e0241469554b11e2d5c48bbe2",
       "art/spider-crest.webp": "463871465207296788529b1cb898ef07daed36f2c4cdaa8990ea306a82fc1446",
       "art/web-left-light.webp": "20e3cb770a8cfb2092bccf0c2ed94584e8aaa0d66e224a724c3d2d5f06fea014",
       "art/web-left.webp": "a343299826d0b23a58f0aaa42c66c456219805cb5cb45d10145e91e1a18ec232",
@@ -37,22 +37,22 @@
       "checklist_parse.luau": "8c05641ceb1670e3a4456253260ffe74f5918d6b0855c0eee58047ffd8caa922",
       "checklist_store.luau": "0f4ebed08ea8bc21122a38108a2150b737527430ae57db1782780a8873565e3f",
       "db.luau": "6ebe1e38571fd982efe6b2db7d9462e40e5256c678caf8b47a6b7e5901948d36",
-      "hub.luau": "1c7c84a1721c15ca67b68a930ef01a25ca596e4c6defa42612f2cea010f6e952",
+      "hub.luau": "420be1148044cdf641436be8059ce7c81699503557984dc047def5afadb03908",
       "icon.svg": "d57a40e73bc9c956728b7ed8465a0f2cfe21eb983375bc70f99fd35668bdc70b",
-      "init.luau": "c09b746fbfe8eeff80e4f568e22faae633bebda01f1c5e4868b91d9fd92244b4",
+      "init.luau": "91239f6c10585c848e3553a3aaf2af8fbcc7292dfd94b273860aae0dad6f4d9c",
       "layout.luau": "162e989ca8f933d61f7a5ebdf3e1ffa28ba7cfe8c7657afaf65ea1ae03a8305b",
       "locales/en.json": "714de10b60df2f5dbdc6a83b8b4dc3d1b469ca8176dda7f74d6763582dd92568",
       "locales/zh-Hans.json": "74f078b46f74abf000f0140be2ddd235f933652aae85af3f06a7e1f9f00ec2a4",
       "notes.luau": "62eec69b42825093194a9969caa68c91b4e4821254efbb2311633559582dc8b5",
       "notes_store.luau": "9ab5e8c2dd093efed3d80dce21b913d20784b781513e8ff70d044866d2ca0c2b",
-      "pet.luau": "5983e3d0a03060f9fe3811a449ddecfc92b6b2f688f992960886f31c0c757998",
+      "pet.luau": "a846a5b2dac9f7e5fc286cba51855d97b75c10677293477af4645be9aaab7712",
       "prompts.luau": "375d7296cf9b1e5375d45483fc2d811d9e9226d67d72eac87a0c440c1fa87fef",
       "radar.luau": "9547d5df8672bb8fdcc4bf6ef9efa9b137ec99c377d9d9f12b904e13f8a25206",
       "toolbar_button.luau": "876dafca164f59f67366314edc125345039a73a32a4f59eff7b2bf2f414da4e7",
       "web_gauge.luau": "ebfa63a379c636360aff5900866d74be0e89ae504e4ef13957fe1b6d03384890",
       "zeron.luau": "4ff74eb343365f154565fb69883e5759df7e4d2ba49f513c8f03d28afe6747d9"
     },
-    "sig": "E8_67kmaCmSm3yHPThESMpzJ0Vc7xUSYbBweoCuCovx74D2jETMggK4fsPnR8gp909m7S7dAtXy92jyTNDrlDQ"
+    "sig": "qzpUb-5p6ezydAZJv_OTJ9ZOIBRXMzdyfGx-EGjG27rpLuOwMXW5KnHYQlFnWX2dXAK8dCEd6p_uqo0JPqkoDQ"
   },
   "icon": "icon.svg",
   "ui": {
