@@ -10,7 +10,7 @@
 
 **纵横宇宙暗夜美学 · 「蜘蛛感应」任务与额度雷达 · 智能避让桌面蜘蛛伙伴 · 本地蛛网提示词库**
 
-[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.4.1-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
+[![Zeron Plugin](https://img.shields.io/badge/Zeron-插件%20v1.5.2-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
 [![Luau](https://img.shields.io/badge/技术栈-Luau-0ea5e9?style=for-the-badge&logo=lua&logoColor=white)](https://luau.org/)
 [![i18n](https://img.shields.io/badge/多语言-EN%20%7C%20%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-10b981?style=for-the-badge)](#-多语言文档)
 [![License: MIT](https://img.shields.io/badge/开源协议-MIT-f59e0b?style=for-the-badge)](./LICENSE)
@@ -95,7 +95,7 @@
 ## 🚀 安装方式
 
 ### 方式一：下载 `.zeron-plugin` 一键安装（推荐）
-1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.4.1.zeron-plugin`。
+1. 前往 [**Releases 页面**](https://github.com/yizixu/zeron-spider-man/releases/latest) 下载 `spider-man-1.5.2.zeron-plugin`。
 2. 在 **Zeron** 中打开 **设置 → 插件 → 从文件安装**（或直接拖入 / 调用 `install_plugin`）。
 3. 启用 **蜘蛛侠（Spider-Man）**，并可在插件设置中一键启用新对话壁纸与各类开关。
 
@@ -118,7 +118,7 @@ Zeron 会自动完成签名校验并热重载插件。
 
 | 设置项 | 类型 | 默认值 | 说明 |
 | :--- | :--- | :--- | :--- |
-| 🖼️ **新对话壁纸** | 壁纸开关 | 宿主选择（默认未开启） | 将暗夜纽约天际线设为新对话背景 |
+| 🖼️ **新对话壁纸** | 壁纸开关 | 宿主选择（默认未开启） | 将随主题切换的纽约天际线设为新对话背景 |
 | 🌀 **3D 视差深度** | `off` / `subtle` / `normal` / `deep` | `normal` | 城市天际线与前景蛛网随鼠标移动的幅度 |
 | 🔔 **蜘蛛感应系统通知** | 开关 | `true` | 会话待确认、报错、完成或低额度时发送系统通知 |
 | 🚨 **额度警戒线** | `10%` / `15%` / `25%` / `35%` | `15%` | 账号剩余额度低于该比例时触发红色警戒 |

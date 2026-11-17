@@ -99,7 +99,9 @@ local function host(initiallyShown)
 		end,
 		div = node("div"), row = node("row"), column = node("column"), text = node("text"),
 		image = node("image"), canvas = node("canvas"), button = node("button"),
+		popover = node("popover"),
 		show = function(when, content) return { tag = "show", when = when, content } end,
+		component = function(build) return build end,
 		presence = function(key, build, _props) return { key = key, build = build } end,
 		spring = function(_source, _props) counters.springs += 1; return {} end,
 		theme = { current = state("dark"), get = function() return 720 end },
@@ -155,7 +157,7 @@ local function host(initiallyShown)
 		if name == "./layout" then return layout end
 		if name == "./db" then return { prompts = function() return {} end } end
 		if name == "@ds/motion" then return { reduced = function() return reduced:get() end } end
-		if name == "@ds/glass" then return { Panel = node("panel") } end
+		if name == "@ds/glass" then return { Panel = node("panel"), style = function(props) return props end } end
 		if name == "@ds/icon_button" then return { IconButton = node("button") } end
 		if name == "@ds/visual_ink" or name == "@ds/material" then return {} end
 		if name == "@ds/icon" then return node("icon") end
@@ -206,11 +208,19 @@ local function usage(remaining)
 	return { { provider = "codex", account = "local", active = true, windows = { { label = "week", remaining = remaining } } } }
 end
 
-local function actor(root)
-	for _, child in root do
-		if type(child) == "table" and child.tag == "button" and child.w == 72 and not child.hidden() then return child end
+local function actors(root)
+	local visible = {}
+	for _, child in ipairs(root) do
+		local popover = if type(child) == "table" then child[1] else nil
+		if type(popover) == "table" and popover.tag == "popover" and not child.hidden() then
+			table.insert(visible, child)
+		end
 	end
-	error("expected a visible spider")
+	return visible
+end
+
+local function actor(root)
+	return assert(actors(root)[1], "expected a visible spider")
 end
 
 -- Hidden-at-start performs no quota requests and registers no event listeners.
@@ -290,17 +300,18 @@ do
 	same(h.timers(), 1, "visible inactive window resumes animation")
 	same(h.listeners("turn.finished"), 2, "resume restores one pet listener")
 	spider = actor(root)
-	spider.on_click()
+	local anchor = spider[1].anchor
+	anchor.on_click()
 	local swingPose
 	for _, s in h.allStates do
 		local v = s:peek()
 		if type(v) == "table" and v.sang and v.hop == 6 and v.st == 0 then swingPose = s end
 	end
 	assert(swingPose, "task finished while hidden restores its completed spider")
-	spider.on_hover(true)
+	anchor.on_hover(true)
 	h.tick(20)
 	same(swingPose:peek().st, 0.02, "hovered Spider-Man swing keeps moving")
-	spider.on_hover(false)
+	anchor.on_hover(false)
 	h.tick(20)
 	local before = table.clone(swingPose:peek())
 	h.shown:set(false)
@@ -313,6 +324,32 @@ do
 	same(h.timers(), 1, "repeated restore leaves one animation timer")
 	h.showPet:set(false)
 	same(h.timers(), 0, "disabled pet remains stopped")
+end
+
+-- Native popover dismissal updates the same selection used by the spiders.
+do
+	local h = host(true)
+	h.sessions:set({
+		A = { id = "A", title = "Task A", status = "working", updated = 1 },
+		B = { id = "B", title = "Task B", status = "working", updated = 2 },
+	})
+	h.init()
+	local visible = actors(h.mountPet())
+	same(#visible, 2, "two active spiders")
+	local a, b = visible[1][1], visible[2][1]
+	same(a.dismiss_on_backdrop, true, "outside press uses native dismissal")
+	a.anchor.on_click()
+	same(a.open(), true, "spider opens its controls")
+	a.on_close()
+	same(a.open(), false, "native close clears the selected spider")
+	a.anchor.on_click()
+	a.anchor.on_click()
+	same(a.open(), false, "clicking the open spider toggles its controls closed")
+	a.anchor.on_click()
+	b.anchor.on_click()
+	a.on_close()
+	same(a.open(), false, "opening a second spider closes the first")
+	same(b.open(), true, "late dismissal from the first does not close the second")
 end
 
 -- A plugin first loaded minimized stays asleep; reduced motion still wins on restore.
@@ -346,14 +383,7 @@ do
 	h.init()
 	local root = h.mountPet()
 	h.shown:set(true)
-	local function visible_count()
-		local count = 0
-		for _, child in root do
-			if type(child) == "table" and child.tag == "button" and child.w == 72 and not child.hidden() then count += 1 end
-		end
-		return count
-	end
-	same(visible_count(), 0, "first restore does not replay historical completions")
+	same(#actors(root), 0, "first restore does not replay historical completions")
 	h.shown:set(false)
 	h.sessions:set({
 		old = { id = "old", title = "Old finish", status = "done", updated = 1 },
@@ -361,7 +391,7 @@ do
 		new = { id = "new", title = "New finish", status = "done", updated = 2 },
 	})
 	h.shown:set(true)
-	same(visible_count(), 1, "later restore recovers a new finish while retaining the baseline")
+	same(#actors(root), 1, "later restore recovers a new finish while retaining the baseline")
 end
 
 -- Execute the real wallpaper placement: its hidden branch never builds springs.

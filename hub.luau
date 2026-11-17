@@ -1189,7 +1189,6 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 			return ui.column {
 				w_full = true,
 				h_full = true,
-				bg = "$background",
 				ui.scroll {
 					w_full = true,
 					grow = 1,
@@ -1211,25 +1210,6 @@ function M.register(zeron: any, active_tab: State<string>, notes: any)
 							bg = "$surface.raised",
 							border = 1,
 							border_color = "$border",
-							ui.presence(function(): string
-								if ui.theme and ui.theme.current then
-									ui.theme.current:get()
-								end
-								return if zeron.read("appearance") == "light" then "light" else "dark"
-							end, function(mode: string): Node
-								return ui.div {
-									w_full = true,
-									h_full = true,
-									opacity = if mode == "light" then 0.34 else 0.16,
-									ui.image {
-										src = if mode == "light" then "art/skyline-dawn.webp" else "art/skyline-neon.webp",
-										w_full = true,
-										h_full = true,
-										fit = "cover",
-										aria_hidden = true,
-									},
-								}
-							end, { absolute = true, left = 0, right = 0, top = 0, bottom = 0 }),
 							ui.div {
 								absolute = true,
 								right = 0,

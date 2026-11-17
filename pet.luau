@@ -1321,6 +1321,254 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 				return nil
 			end
 
+			local CompanionMenu = ui.component(function(): Node
+				return ui.column {
+					w_full = true,
+					gap = "$space.2",
+					ui.row {
+						w_full = true,
+						items = "center",
+						justify = "between",
+						gap = "$space.2",
+						ui.row {
+							items = "center",
+							gap = "$space.2",
+							ui.image { src = "art/spider-crest.webp", w = 16, h = 16, fit = "contain", aria_hidden = true },
+							ui.text { zeron.t("pet.title"), font = "$font.mono", text_size = "$font.size.xs", weight = "$font.weight.bold" },
+						},
+						ui.row {
+							items = "center",
+							gap = "$space.1",
+							ui.text {
+								function(): string
+									meta_rev:get()
+									return quota_label
+								end,
+								literal = true,
+								font = "$font.mono",
+								text_size = "$font.size.xs",
+								color = "$text.tertiary",
+							},
+							IconButton.IconButton {
+								icon = "close",
+								size = "sm",
+								label = zeron.s("pet.close"),
+								on_click = function()
+									menu_slot_idx:set(0)
+								end,
+							},
+						},
+					},
+
+					ui.column {
+						w_full = true,
+						p = "$space.2",
+						gap = "$space.2",
+						rounded = "$radius.md",
+						bg = "$surface.raised",
+						border = 1,
+						border_color = "$border",
+						ui.column {
+							w_full = true,
+							gap = 4,
+							ui.row {
+								w_full = true,
+								items = "center",
+								gap = "$space.1",
+								ui.div {
+									w = 6,
+									h = 6,
+									rounded = "$radius.full",
+									shrink = 0,
+									bg = function(): string
+										meta_rev:get()
+										local sl = selected_slot()
+										local k = if sl then sl.kind else "patrol"
+										if k == "attention" then
+											return "$warning"
+										elseif k == "working" then
+											return "$accent"
+										elseif k == "current" then
+											return "$success"
+										end
+										return "$text.tertiary"
+									end,
+								},
+								ui.text {
+									function(): string
+										meta_rev:get()
+										local sl = selected_slot()
+										local k = if sl then sl.kind else "patrol"
+										if k == "attention" then
+											return zeron.s("pet.kind_attention")
+										elseif k == "working" then
+											return zeron.s("pet.kind_working")
+										elseif k == "current" then
+											return zeron.s("pet.kind_current")
+										end
+										return zeron.s("pet.kind_patrol")
+									end,
+									literal = true,
+									font = "$font.mono",
+									text_size = "$font.size.xs",
+									color = function(): string
+										meta_rev:get()
+										local sl = selected_slot()
+										local k = if sl then sl.kind else "patrol"
+										if k == "attention" then
+											return "$warning"
+										elseif k == "working" then
+											return "$accent"
+										elseif k == "current" then
+											return "$success"
+										end
+										return "$text.tertiary"
+									end,
+								},
+							},
+							ui.text {
+								function(): string
+									meta_rev:get()
+									local sl = selected_slot()
+									if not sl then
+										return ""
+									end
+									if sl.kind == "patrol" or not sl.sid or sl.sid == "__patrol__" then
+										return zeron.s("pet.status_patrol")
+									end
+									return short_title(sl.title, 28)
+								end,
+								literal = true,
+								text_size = "$font.size.xs",
+								weight = "$font.weight.medium",
+								color = "$text.primary",
+								wrap = true,
+							},
+						},
+						ui.row {
+							w_full = true,
+							items = "center",
+							gap = "$space.2",
+							ui.show(function(): boolean
+								meta_rev:get()
+								local sl = selected_slot()
+								return sl ~= nil and sl.sid ~= nil and sl.sid ~= "__patrol__"
+							end, Button {
+								tone = "primary",
+								size = "sm",
+								shape = "rounded",
+								grow = 1,
+								min_w = 0,
+								on_click = function()
+									local sl = selected_slot()
+									if sl and sl.sid and sl.sid ~= "__patrol__" then
+										zeron.open { session = sl.sid }
+									end
+									menu_slot_idx:set(0)
+								end,
+								Icon { name = "arrow-right", size = 12 },
+								ui.text { zeron.t("pet.btn_open_chat") },
+							}),
+							Button {
+								tone = "secondary",
+								size = "sm",
+								shape = "rounded",
+								grow = 1,
+								min_w = 0,
+								on_click = function()
+									local list = db.prompts()
+									if active_chat_id ~= nil then
+										zeron.compose(zeron.s("pet.inspect_prompt"))
+										zeron.toast(zeron.s("pet.toast_composed"))
+									elseif #list > 0 then
+										local p_item = list[rand_int(1, #list)]
+										zeron.compose(p_item.content)
+										zeron.toast(zeron.s("pet.toast_prompt", { title = p_item.title }))
+									else
+										zeron.compose(zeron.s("pet.inspect_prompt"))
+										zeron.toast(zeron.s("pet.toast_composed"))
+									end
+									menu_slot_idx:set(0)
+								end,
+								Icon { name = "magic-stick", size = 12 },
+								ui.text {
+									function(): string
+										meta_rev:get()
+										return if active_chat_id ~= nil
+											then zeron.s("pet.btn_inspect_chat")
+											else zeron.s("pet.btn_draft_prompt")
+									end,
+									literal = true,
+								},
+							},
+						},
+					},
+
+					ui.row {
+						w_full = true,
+						items = "center",
+						gap = "$space.1",
+						Button {
+							tone = "ghost",
+							size = "xs",
+							shape = "rounded",
+							grow = 1,
+							min_w = 0,
+							on_click = function()
+								local sl = selected_slot()
+								menu_slot_idx:set(0)
+								if sl then
+									start_weave(sl)
+								end
+							end,
+							Icon { name = "star", size = 11 },
+							ui.text { zeron.t("pet.btn_weave") },
+						},
+						Button {
+							tone = "ghost",
+							size = "xs",
+							shape = "rounded",
+							grow = 1,
+							min_w = 0,
+							on_click = function()
+								local sl = selected_slot()
+								menu_slot_idx:set(0)
+								if sl then
+									start_rappel(sl)
+									say_slot(sl, zeron.s("pet.rappel_say"), 3.0)
+								end
+							end,
+							Icon { name = "eye", size = 11 },
+							ui.text { zeron.t("pet.btn_rappel") },
+						},
+						Button {
+							tone = "ghost",
+							size = "xs",
+							shape = "rounded",
+							grow = 1,
+							min_w = 0,
+							on_click = function()
+								local sl = selected_slot()
+								menu_slot_idx:set(0)
+								if sl then
+									local nx, nby = pick_target(false)
+									sl.tx = nx
+									sl.tby = nby
+									sl.phase:set("walk")
+									say_slot(sl, zeron.s("pet.roam_say"), 2.8)
+								end
+							end,
+							Icon { name = "refresh", size = 11 },
+							ui.text { zeron.t("pet.btn_roam") },
+						},
+					},
+					zeron.slot("pet_actions", {
+						w_full = true,
+						gap = "$space.1",
+					}),
+				}
+			end)
+
 			-- Build direct children table using table.insert (NEVER mid-table table.unpack!)
 			-- and use reactive hidden= on each absolute element (zero nested 0x0 wrapper clipping).
 			local layer_children: { [any]: any } = {
@@ -1604,19 +1852,7 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 				})
 
 				-- 5. Interactive Spider / Cartoon Spider-Man actor
-				table.insert(layer_children, ui.button {
-					absolute = true,
-					hidden = function(): boolean
-						return not slot_visible()
-					end,
-					left = -ACTOR_BOX / 2,
-					top = -ACTOR_BOX / 2,
-					x = function(): number
-						return sl.pose:get().x
-					end,
-					y = function(): number
-						return -sl.pose:get().by
-					end,
+				local actor = ui.button {
 					w = ACTOR_BOX,
 					h = ACTOR_BOX,
 					p = 0,
@@ -1672,278 +1908,45 @@ function M.register(zeron: any, show_pet: any, on_mount_cb: (() -> ())?, on_clea
 						end
 					end,
 					SpiderActorCanvas { slot = sl },
+				}
+				table.insert(layer_children, ui.div {
+					absolute = true,
+					hidden = function(): boolean
+						return not slot_visible()
+					end,
+					left = -ACTOR_BOX / 2,
+					top = -ACTOR_BOX / 2,
+					x = function(): number
+						return sl.pose:get().x
+					end,
+					y = function(): number
+						return -sl.pose:get().by
+					end,
+					w = ACTOR_BOX,
+					h = ACTOR_BOX,
+					pointer_events = "none",
+					ui.popover(Glass.style({
+						id = `spider-pet-popover-{sl.idx}`,
+						anchor = actor,
+						open = function(): boolean
+							return slot_visible() and menu_slot_idx:get() == sl.idx
+						end,
+						on_close = function()
+							if menu_slot_idx:peek() == sl.idx then
+								menu_slot_idx:set(0)
+							end
+						end,
+						dismiss_on_backdrop = true,
+						autofocus = false,
+						placement = { side = "bottom", align = "center", offset = 8 },
+						label = zeron.t("pet.title"),
+						w = 272,
+						p = "$space.3",
+						rounded = "$radius.xl",
+						CompanionMenu {},
+					}, "menu")),
 				})
 			end
-
-			-- 6. Interactive companion popover (single shared instance)
-			table.insert(layer_children, Glass.Panel {
-				id = "spider-pet-popover",
-				kind = "menu",
-				absolute = true,
-				hidden = function(): boolean
-					return not (is_pet_on() and selected_slot() ~= nil)
-				end,
-				left = function(): number
-					local sl = selected_slot()
-					local W = math.max(360, win_w:get())
-					local x = if sl then sl.pose:get().x else 300
-					return clamp(x - 136, 14, W - 286)
-				end,
-				top = function(): number
-					local sl = selected_slot()
-					local by_now = if sl then sl.pose:get().by else 260
-					return if by_now < 220 then -by_now - 208 else -by_now + 32
-				end,
-				w = 272,
-				p = "$space.3",
-				gap = "$space.2",
-				rounded = "$radius.xl",
-				pointer_events = function(): string
-					return if is_pet_on() and selected_slot() ~= nil then "auto" else "none"
-				end,
-
-				ui.row {
-					w_full = true,
-					items = "center",
-					justify = "between",
-					gap = "$space.2",
-					ui.row {
-						items = "center",
-						gap = "$space.2",
-						ui.image { src = "art/spider-crest.webp", w = 16, h = 16, fit = "contain", aria_hidden = true },
-						ui.text { zeron.t("pet.title"), font = "$font.mono", text_size = "$font.size.xs", weight = "$font.weight.bold" },
-					},
-					ui.row {
-						items = "center",
-						gap = "$space.1",
-						ui.text {
-							function(): string
-								meta_rev:get()
-								return quota_label
-							end,
-							literal = true,
-							font = "$font.mono",
-							text_size = "$font.size.xs",
-							color = "$text.tertiary",
-						},
-						IconButton.IconButton {
-							icon = "close",
-							size = "sm",
-							label = zeron.s("pet.close"),
-							on_click = function()
-								menu_slot_idx:set(0)
-							end,
-						},
-					},
-				},
-
-				ui.column {
-					w_full = true,
-					p = "$space.2",
-					gap = "$space.2",
-					rounded = "$radius.md",
-					bg = "$surface.raised",
-					border = 1,
-					border_color = "$border",
-					ui.column {
-						w_full = true,
-						gap = 4,
-						ui.row {
-							w_full = true,
-							items = "center",
-							gap = "$space.1",
-							ui.div {
-								w = 6,
-								h = 6,
-								rounded = "$radius.full",
-								shrink = 0,
-								bg = function(): string
-									meta_rev:get()
-									local sl = selected_slot()
-									local k = if sl then sl.kind else "patrol"
-									if k == "attention" then
-										return "$warning"
-									elseif k == "working" then
-										return "$accent"
-									elseif k == "current" then
-										return "$success"
-									end
-									return "$text.tertiary"
-								end,
-							},
-							ui.text {
-								function(): string
-									meta_rev:get()
-									local sl = selected_slot()
-									local k = if sl then sl.kind else "patrol"
-									if k == "attention" then
-										return zeron.s("pet.kind_attention")
-									elseif k == "working" then
-										return zeron.s("pet.kind_working")
-									elseif k == "current" then
-										return zeron.s("pet.kind_current")
-									end
-									return zeron.s("pet.kind_patrol")
-								end,
-								literal = true,
-								font = "$font.mono",
-								text_size = "$font.size.xs",
-								color = function(): string
-									meta_rev:get()
-									local sl = selected_slot()
-									local k = if sl then sl.kind else "patrol"
-									if k == "attention" then
-										return "$warning"
-									elseif k == "working" then
-										return "$accent"
-									elseif k == "current" then
-										return "$success"
-									end
-									return "$text.tertiary"
-								end,
-							},
-						},
-						ui.text {
-							function(): string
-								meta_rev:get()
-								local sl = selected_slot()
-								if not sl then
-									return ""
-								end
-								if sl.kind == "patrol" or not sl.sid or sl.sid == "__patrol__" then
-									return zeron.s("pet.status_patrol")
-								end
-								return short_title(sl.title, 28)
-							end,
-							literal = true,
-							text_size = "$font.size.xs",
-							weight = "$font.weight.medium",
-							color = "$text.primary",
-							wrap = true,
-						},
-					},
-					ui.row {
-						w_full = true,
-						items = "center",
-						gap = "$space.2",
-						ui.show(function(): boolean
-							meta_rev:get()
-							local sl = selected_slot()
-							return sl ~= nil and sl.sid ~= nil and sl.sid ~= "__patrol__"
-						end, Button {
-							tone = "primary",
-							size = "sm",
-							shape = "rounded",
-							grow = 1,
-							min_w = 0,
-							on_click = function()
-								local sl = selected_slot()
-								if sl and sl.sid and sl.sid ~= "__patrol__" then
-									zeron.open { session = sl.sid }
-								end
-								menu_slot_idx:set(0)
-							end,
-							Icon { name = "arrow-right", size = 12 },
-							ui.text { zeron.t("pet.btn_open_chat") },
-						}),
-						Button {
-							tone = "secondary",
-							size = "sm",
-							shape = "rounded",
-							grow = 1,
-							min_w = 0,
-							on_click = function()
-								local list = db.prompts()
-								if active_chat_id ~= nil then
-									zeron.compose(zeron.s("pet.inspect_prompt"))
-									zeron.toast(zeron.s("pet.toast_composed"))
-								elseif #list > 0 then
-									local p_item = list[rand_int(1, #list)]
-									zeron.compose(p_item.content)
-									zeron.toast(zeron.s("pet.toast_prompt", { title = p_item.title }))
-								else
-									zeron.compose(zeron.s("pet.inspect_prompt"))
-									zeron.toast(zeron.s("pet.toast_composed"))
-								end
-								menu_slot_idx:set(0)
-							end,
-							Icon { name = "magic-stick", size = 12 },
-							ui.text {
-								function(): string
-									meta_rev:get()
-									return if active_chat_id ~= nil
-										then zeron.s("pet.btn_inspect_chat")
-										else zeron.s("pet.btn_draft_prompt")
-								end,
-								literal = true,
-							},
-						},
-					},
-				},
-
-				ui.row {
-					w_full = true,
-					items = "center",
-					gap = "$space.1",
-					Button {
-						tone = "ghost",
-						size = "xs",
-						shape = "rounded",
-						grow = 1,
-						min_w = 0,
-						on_click = function()
-							local sl = selected_slot()
-							menu_slot_idx:set(0)
-							if sl then
-								start_weave(sl)
-							end
-						end,
-						Icon { name = "star", size = 11 },
-						ui.text { zeron.t("pet.btn_weave") },
-					},
-					Button {
-						tone = "ghost",
-						size = "xs",
-						shape = "rounded",
-						grow = 1,
-						min_w = 0,
-						on_click = function()
-							local sl = selected_slot()
-							menu_slot_idx:set(0)
-							if sl then
-								start_rappel(sl)
-								say_slot(sl, zeron.s("pet.rappel_say"), 3.0)
-							end
-						end,
-						Icon { name = "eye", size = 11 },
-						ui.text { zeron.t("pet.btn_rappel") },
-					},
-					Button {
-						tone = "ghost",
-						size = "xs",
-						shape = "rounded",
-						grow = 1,
-						min_w = 0,
-						on_click = function()
-							local sl = selected_slot()
-							menu_slot_idx:set(0)
-							if sl then
-								local nx, nby = pick_target(false)
-								sl.tx = nx
-								sl.tby = nby
-								sl.phase:set("walk")
-								say_slot(sl, zeron.s("pet.roam_say"), 2.8)
-							end
-						end,
-						Icon { name = "refresh", size = 11 },
-						ui.text { zeron.t("pet.btn_roam") },
-					},
-				},
-				zeron.slot("pet_actions", {
-					w_full = true,
-					gap = "$space.1",
-				}),
-			})
 
 			return ui.div(layer_children)
 		end,

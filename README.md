@@ -10,7 +10,7 @@
 
 **Spider-Verse Atmosphere · Spider-Sense Session & Quota Radar · Smart Desktop Patrol Pet · Local Web Vault**
 
-[![Zeron Plugin](https://img.shields.io/badge/Zeron-Plugin%20v1.4.1-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
+[![Zeron Plugin](https://img.shields.io/badge/Zeron-Plugin%20v1.5.2-e11d48?style=for-the-badge&logo=spider&logoColor=white)](https://github.com/yizixu/zeron-spider-man)
 [![Luau](https://img.shields.io/badge/Built%20with-Luau-0ea5e9?style=for-the-badge&logo=lua&logoColor=white)](https://luau.org/)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-10b981?style=for-the-badge)](#-languages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](./LICENSE)
@@ -95,7 +95,7 @@ All visuals shown below are the **actual built-in assets** shipped inside the pl
 ## 🚀 Installation
 
 ### Option A: One-Click `.zeron-plugin` Install (Recommended)
-1. Download `spider-man-1.4.1.zeron-plugin` from the [**Latest Release**](https://github.com/yizixu/zeron-spider-man/releases/latest).
+1. Download `spider-man-1.5.2.zeron-plugin` from the [**Latest Release**](https://github.com/yizixu/zeron-spider-man/releases/latest).
 2. In **Zeron**, go to **Settings → Plugins → Install from file** (or drag-and-drop / use `install_plugin`).
 3. Enable **Spider-Man**, and optionally set the **Spider-Verse Skyline** wallpaper in plugin settings.
 
